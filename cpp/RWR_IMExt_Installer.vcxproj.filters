@@ -109,4 +109,9 @@
       <Filter>res</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="res\app.manifest">
+      <Filter>res</Filter>
+    </Manifest>
+  </ItemGroup>
 </Project>

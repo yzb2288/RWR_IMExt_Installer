@@ -153,7 +153,7 @@ void AskDialog::InitSizeParam() {
     RECT rcIcon;
     staticIcon.GetClientRect(&rcIcon);
     m_sizeIcon.cx = rcIcon.right - rcIcon.left;
-    m_sizeIcon.cy = rcIcon.bottom - rcIcon.top;
+    m_sizeIcon.cy = m_sizeIcon.cx;  // 强制图标长宽一致
 
     // 获取按钮尺寸
     CButton btnOk = (CButton)GetDlgItem(IDOK_ASK_DIALOG);
