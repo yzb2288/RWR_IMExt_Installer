@@ -1,0 +1,53 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# vscode
+.vscode
+cpp/Debug/
+cpp/Release/
+cpp/RWR_IMExt_Installer/
+
+# vs
+.vs
+
+# python
+**/__pycache__/**
+
+# backup
+backup/
+
+# imext files
+RunningWithRifles/
+
+# install_conf json
+install_conf.json
