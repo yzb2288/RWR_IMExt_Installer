@@ -162,12 +162,16 @@ void AskDialog::InitSizeParam() {
     m_sizeButton.cx = rcButton.right - rcButton.left;
     m_sizeButton.cy = rcButton.bottom - rcButton.top;
 
+    // 根据DPI缩放计算间距
+    m_gridHorizontalSpacing = ScalePixelForWindow(m_hWnd, GRID_HORIZONTAL_SPACING);
+    m_gridVerticalSpacing = ScalePixelForWindow(m_hWnd, GRID_VERTICAL_SPACING);
+
     // 确定窗口最小尺寸(客户区)
-    int minClientWidthA = 3 * GRID_HORIZONTAL_SPACING + m_sizeIcon.cx + m_sizeText.cx;
-    m_btnSpacing = 2 * GRID_HORIZONTAL_SPACING;
-    int minClientWidthB = 2 * GRID_HORIZONTAL_SPACING + m_btnSpacing + 2 * m_sizeButton.cx;
+    int minClientWidthA = 3 * m_gridHorizontalSpacing + m_sizeIcon.cx + m_sizeText.cx;
+    m_btnSpacing = 2 * m_gridHorizontalSpacing;
+    int minClientWidthB = 2 * m_gridHorizontalSpacing + m_btnSpacing + 2 * m_sizeButton.cx;
     m_minClientWidth = minClientWidthA > minClientWidthB ? minClientWidthA : minClientWidthB;
-    m_minClientHeight = 3 * GRID_VERTICAL_SPACING + m_sizeButton.cy + (m_sizeIcon.cy > m_sizeText.cy ? m_sizeIcon.cy : m_sizeText.cy);
+    m_minClientHeight = 3 * m_gridVerticalSpacing + m_sizeButton.cy + (m_sizeIcon.cy > m_sizeText.cy ? m_sizeIcon.cy : m_sizeText.cy);
 }
 
 void AskDialog::UpdateLayout(int clientWidth, int clientHeight) {
@@ -176,35 +180,35 @@ void AskDialog::UpdateLayout(int clientWidth, int clientHeight) {
     CButton btnOk = (CButton)GetDlgItem(IDOK_ASK_DIALOG);
     CButton btnCancel = (CButton)GetDlgItem(IDCANCEL_ASK_DIALOG);
 
-    int currentTextWidth = clientWidth - (3 * GRID_HORIZONTAL_SPACING + m_sizeIcon.cx);
+    int currentTextWidth = clientWidth - (3 * m_gridHorizontalSpacing + m_sizeIcon.cx);
     int currentTextHeight = CalculateStaticHeight(staticText, currentTextWidth, m_strText);
     int lineTextHeight = (m_sizeIcon.cy > currentTextHeight ? m_sizeIcon.cy : currentTextHeight);
 
     if (m_sizeIcon.cy > currentTextHeight) {
         // 图标比文字高, 文字上下居中
         staticIcon.MoveWindow(
-            GRID_HORIZONTAL_SPACING,
-            GRID_VERTICAL_SPACING,
+            m_gridHorizontalSpacing,
+            m_gridVerticalSpacing,
             m_sizeIcon.cx,
             m_sizeIcon.cy
         );
         staticText.MoveWindow(
-            2 * GRID_HORIZONTAL_SPACING + m_sizeIcon.cx,
-            GRID_VERTICAL_SPACING + (m_sizeIcon.cy - currentTextHeight) / 2,
+            2 * m_gridHorizontalSpacing + m_sizeIcon.cx,
+            m_gridVerticalSpacing + (m_sizeIcon.cy - currentTextHeight) / 2,
             currentTextWidth,
             currentTextHeight
         );
     } else {
         // 图标比文字低, 图标上下居中
         staticIcon.MoveWindow(
-            GRID_HORIZONTAL_SPACING,
-            GRID_VERTICAL_SPACING + (currentTextHeight - m_sizeIcon.cy) / 2,
+            m_gridHorizontalSpacing,
+            m_gridVerticalSpacing + (currentTextHeight - m_sizeIcon.cy) / 2,
             m_sizeIcon.cx,
             m_sizeIcon.cy
         );
         staticText.MoveWindow(
-            2 * GRID_HORIZONTAL_SPACING + m_sizeIcon.cx,
-            GRID_VERTICAL_SPACING,
+            2 * m_gridHorizontalSpacing + m_sizeIcon.cx,
+            m_gridVerticalSpacing,
             currentTextWidth,
             currentTextHeight
         );
@@ -214,29 +218,29 @@ void AskDialog::UpdateLayout(int clientWidth, int clientHeight) {
     
     if (m_bShowTreeDialog) {
         m_tree.MoveWindow(
-            GRID_HORIZONTAL_SPACING,
-            2 * GRID_VERTICAL_SPACING + lineTextHeight,
-            clientWidth - 2 * GRID_HORIZONTAL_SPACING,
-            clientHeight - (4 * GRID_VERTICAL_SPACING + lineTextHeight + m_sizeButton.cy)
+            m_gridHorizontalSpacing,
+            2 * m_gridVerticalSpacing + lineTextHeight,
+            clientWidth - 2 * m_gridHorizontalSpacing,
+            clientHeight - (4 * m_gridVerticalSpacing + lineTextHeight + m_sizeButton.cy)
         );
         m_tree.ShowWindow(SW_SHOW);
     } else {
         m_tree.ShowWindow(SW_HIDE);
     }
 
-    // 两按钮居中 int lineButtonStartX = (clientWidth - 2 * GRID_HORIZONTAL_SPACING - m_btnSpacing - 2 * m_sizeButton.cx) / 2 + GRID_HORIZONTAL_SPACING;
+    // 两按钮居中 int lineButtonStartX = (clientWidth - 2 * m_gridHorizontalSpacing - m_btnSpacing - 2 * m_sizeButton.cx) / 2 + m_gridHorizontalSpacing;
     int lineButtonStartX;
     if (m_askMode) {
         // 两个按钮靠右
-        lineButtonStartX = clientWidth - GRID_HORIZONTAL_SPACING - m_btnSpacing - 2 * m_sizeButton.cx;
+        lineButtonStartX = clientWidth - m_gridHorizontalSpacing - m_btnSpacing - 2 * m_sizeButton.cx;
     } else {
         // 只有一个按钮靠右
-        lineButtonStartX = clientWidth - GRID_HORIZONTAL_SPACING - m_sizeButton.cx;
+        lineButtonStartX = clientWidth - m_gridHorizontalSpacing - m_sizeButton.cx;
     }
     
     btnOk.MoveWindow(
         lineButtonStartX,
-        clientHeight - GRID_VERTICAL_SPACING - m_sizeButton.cy,
+        clientHeight - m_gridVerticalSpacing - m_sizeButton.cy,
         m_sizeButton.cx,
         m_sizeButton.cy
     );
@@ -245,7 +249,7 @@ void AskDialog::UpdateLayout(int clientWidth, int clientHeight) {
     if (m_askMode) {
         btnCancel.MoveWindow(
             lineButtonStartX + m_sizeButton.cx + m_btnSpacing,
-            clientHeight - GRID_VERTICAL_SPACING - m_sizeButton.cy,
+            clientHeight - m_gridVerticalSpacing - m_sizeButton.cy,
             m_sizeButton.cx,
             m_sizeButton.cy
         );
@@ -287,7 +291,7 @@ void AskDialog::GetMinWinSize(LONG& minWinWidth, LONG& minWinHeight) {
     // 1. 定义客户区最小尺寸
     int minClientHeight = m_minClientHeight;
     if (m_bShowTreeDialog)
-        minClientHeight += m_minTreeHeight + GRID_VERTICAL_SPACING;
+        minClientHeight += m_minTreeHeight + m_gridVerticalSpacing;
     RECT rcMin = { 0, 0, m_minClientWidth, minClientHeight }; 
 
     // 2. 根据窗口样式获取尺寸

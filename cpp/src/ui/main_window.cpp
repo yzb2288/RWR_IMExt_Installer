@@ -61,16 +61,21 @@ LRESULT MainWindow::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
     // 5. 恢复字体
     dc.SelectFont(hOldFont);
 
-    m_btnWidth = 2 * BTN_TEXT_HORIZONTAL_PADDING + m_sizeBtnReferText.cx;
-    m_btnHeight =  2 * BTN_TEXT_VERTICAL_PADDING + m_sizeBtnReferText.cy;
+    m_btnTextHorizontalPadding = ScalePixelForWindow(m_hWnd, BTN_TEXT_HORIZONTAL_PADDING);
+    m_btnTextVerticalPadding = ScalePixelForWindow(m_hWnd, BTN_TEXT_VERTICAL_PADDING);
+    m_gridHorizontalSpacing = ScalePixelForWindow(m_hWnd, GRID_HORIZONTAL_SPACING);
+    m_gridVerticalSpacing = ScalePixelForWindow(m_hWnd, GRID_VERTICAL_SPACING);
 
-    m_editWidth = BTN_TEXT_HORIZONTAL_PADDING + m_sizeEditReferText.cx;
+    m_btnWidth = 2 * m_btnTextHorizontalPadding + m_sizeBtnReferText.cx;
+    m_btnHeight =  2 * m_btnTextVerticalPadding + m_sizeBtnReferText.cy;
+
+    m_editWidth = m_btnTextHorizontalPadding + m_sizeEditReferText.cx;
     m_editWidth = (m_editWidth < 2 * m_btnWidth) ? 2 * m_btnWidth : m_editWidth;
     
     m_minTreeHeight = 5 * m_btnHeight;
 
-    m_minClientWidth = 3 * GRID_HORIZONTAL_SPACING + m_btnWidth + m_editWidth;
-    m_minClientHeight = 4 * GRID_VERTICAL_SPACING + 3 * m_btnHeight;
+    m_minClientWidth = 3 * m_gridHorizontalSpacing + m_btnWidth + m_editWidth;
+    m_minClientHeight = 4 * m_gridVerticalSpacing + 3 * m_btnHeight;
 
     m_btnSelectRwrInstallPath.Create(m_hWnd, CButton::rcDefault, _TR(IDS_SELECT_RWR_PATH),
         WS_CHILD | WS_VISIBLE, 0, IDC_BTN_SELECT_RWR_INSTALL_PATH);
@@ -155,41 +160,41 @@ LRESULT MainWindow::OnSize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, BOOL
 void MainWindow::UpdateLayout(int clientWidth, int clientHeight)
 {
     m_btnSelectRwrInstallPath.MoveWindow(
-        GRID_HORIZONTAL_SPACING,
-        GRID_VERTICAL_SPACING,
+        m_gridHorizontalSpacing,
+        m_gridVerticalSpacing,
         m_btnWidth,
         m_btnHeight
     );
     m_editRwrInstallPath.MoveWindow(
-        2 * GRID_HORIZONTAL_SPACING + m_btnWidth,
-        GRID_VERTICAL_SPACING,
-        clientWidth - (3 * GRID_HORIZONTAL_SPACING + m_btnWidth),
+        2 * m_gridHorizontalSpacing + m_btnWidth,
+        m_gridVerticalSpacing,
+        clientWidth - (3 * m_gridHorizontalSpacing + m_btnWidth),
         m_btnHeight
     );
 
     m_btnSelectBackupPath.MoveWindow(
-        GRID_HORIZONTAL_SPACING,
-        2 * GRID_VERTICAL_SPACING + m_btnHeight,
+        m_gridHorizontalSpacing,
+        2 * m_gridVerticalSpacing + m_btnHeight,
         m_btnWidth,
         m_btnHeight
     );
     m_editBackupPath.MoveWindow(
-        2 * GRID_HORIZONTAL_SPACING + m_btnWidth,
-        2 * GRID_VERTICAL_SPACING + m_btnHeight,
-        clientWidth - (3 * GRID_HORIZONTAL_SPACING + m_btnWidth),
+        2 * m_gridHorizontalSpacing + m_btnWidth,
+        2 * m_gridVerticalSpacing + m_btnHeight,
+        clientWidth - (3 * m_gridHorizontalSpacing + m_btnWidth),
         m_btnHeight
     );
 
     m_btnInstallIMExt.MoveWindow(
-        GRID_HORIZONTAL_SPACING,
-        3 * GRID_VERTICAL_SPACING + 2 * m_btnHeight,
+        m_gridHorizontalSpacing,
+        3 * m_gridVerticalSpacing + 2 * m_btnHeight,
         m_btnWidth,
         m_btnHeight
     );
     m_labelIMExtInstallStatus.MoveWindow(
-        2 * GRID_HORIZONTAL_SPACING + m_btnWidth,
-        3 * GRID_VERTICAL_SPACING + 2 * m_btnHeight,
-        clientWidth - (3 * GRID_HORIZONTAL_SPACING + m_btnWidth),
+        2 * m_gridHorizontalSpacing + m_btnWidth,
+        3 * m_gridVerticalSpacing + 2 * m_btnHeight,
+        clientWidth - (3 * m_gridHorizontalSpacing + m_btnWidth),
         m_btnHeight
     );
 
@@ -200,15 +205,15 @@ void MainWindow::UpdateLayout(int clientWidth, int clientHeight)
         {
             m_tree.ShowWindow(SW_SHOW);
             FileTreeView::m_tree.MoveWindow(
-                GRID_HORIZONTAL_SPACING,
-                4 * GRID_VERTICAL_SPACING + 3 * m_btnHeight,
-                clientWidth - 2 * GRID_HORIZONTAL_SPACING,
-                clientHeight - (6 * GRID_VERTICAL_SPACING + 3 * m_btnHeight + m_sizeBtnReferText.cy)
+                m_gridHorizontalSpacing,
+                4 * m_gridVerticalSpacing + 3 * m_btnHeight,
+                clientWidth - 2 * m_gridHorizontalSpacing,
+                clientHeight - (6 * m_gridVerticalSpacing + 3 * m_btnHeight + m_sizeBtnReferText.cy)
             );
             m_labelProgress.MoveWindow(
-                GRID_HORIZONTAL_SPACING,
-                clientHeight - (GRID_VERTICAL_SPACING + m_sizeBtnReferText.cy),
-                clientWidth - 2 * GRID_HORIZONTAL_SPACING,
+                m_gridHorizontalSpacing,
+                clientHeight - (m_gridVerticalSpacing + m_sizeBtnReferText.cy),
+                clientWidth - 2 * m_gridHorizontalSpacing,
                 m_sizeBtnReferText.cy // 使用字体高度避免最后一行空间太多
             );
         }
@@ -217,10 +222,10 @@ void MainWindow::UpdateLayout(int clientWidth, int clientHeight)
             m_tree.ShowWindow(SW_HIDE);
             // 没有树的情况下, 垂直空间用m_labelProgress填满
             m_labelProgress.MoveWindow(
-                GRID_HORIZONTAL_SPACING,
-                4 * GRID_VERTICAL_SPACING + 3 * m_btnHeight,
-                clientWidth - 2 * GRID_HORIZONTAL_SPACING,
-                clientHeight - (5 * GRID_VERTICAL_SPACING + 3 * m_btnHeight)
+                m_gridHorizontalSpacing,
+                4 * m_gridVerticalSpacing + 3 * m_btnHeight,
+                clientWidth - 2 * m_gridHorizontalSpacing,
+                clientHeight - (5 * m_gridVerticalSpacing + 3 * m_btnHeight)
             );
         }
         
@@ -232,10 +237,10 @@ void MainWindow::UpdateLayout(int clientWidth, int clientHeight)
         {
             m_tree.ShowWindow(SW_SHOW);
             FileTreeView::m_tree.MoveWindow(
-                GRID_HORIZONTAL_SPACING,
-                4 * GRID_VERTICAL_SPACING + 3 * m_btnHeight,
-                clientWidth - 2 * GRID_HORIZONTAL_SPACING,
-                clientHeight - (5 * GRID_VERTICAL_SPACING + 3 * m_btnHeight)
+                m_gridHorizontalSpacing,
+                4 * m_gridVerticalSpacing + 3 * m_btnHeight,
+                clientWidth - 2 * m_gridHorizontalSpacing,
+                clientHeight - (5 * m_gridVerticalSpacing + 3 * m_btnHeight)
             );
         } else {
             m_tree.ShowWindow(SW_HIDE);
@@ -257,7 +262,7 @@ void MainWindow::GetMinWinSize(LONG& minWinWidth, LONG& minWinHeight)
     if (m_bShowTreeMain)
         minClientHeight += m_minTreeHeight;
     if (!m_labelProgressText.IsEmpty())
-        minClientHeight += m_sizeBtnReferText.cy + GRID_VERTICAL_SPACING;
+        minClientHeight += m_sizeBtnReferText.cy + m_gridVerticalSpacing;
     RECT rcMin = { 0, 0, m_minClientWidth, minClientHeight }; 
 
     // 2. 根据窗口样式获取尺寸

@@ -8,7 +8,7 @@
 
 #include "cjson/cJSON.h"
 
-#include "resource.h"
+#include "ui/common.h"
 #include "ui/file_tree_view.h"
 
 #include "i18n/i18n.h"
@@ -38,6 +38,8 @@ private:
     CString m_strText;
     CString m_strSizeReferText = _T("============SINGLE_LINE_TEXT_SIZE_REFERENCE============");
 
+    int m_gridHorizontalSpacing = 0;
+    int m_gridVerticalSpacing = 0;
     SIZE m_sizeReferText = {0, 0};
     SIZE m_sizeText = {0, 0};
     SIZE m_sizeIcon = {0, 0};

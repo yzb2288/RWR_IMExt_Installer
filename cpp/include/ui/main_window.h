@@ -11,7 +11,7 @@
 
 #include "cjson/cJSON.h"
 
-#include "resource.h"
+#include "ui/common.h"
 #include "ui/file_tree_view.h"
 #include "ui/ask_dialog.h"
 #include "ui/color_button.h"
@@ -117,7 +117,10 @@ private:
     volatile PVOID m_pPendingIMExtInstallStatusText = NULL;
     volatile PVOID m_pPendingProgressText = NULL;
 
-
+    int m_btnTextHorizontalPadding = 0;
+    int m_btnTextVerticalPadding = 0;
+    int m_gridHorizontalSpacing = 0;
+    int m_gridVerticalSpacing = 0;
     SIZE m_sizeBtnReferText = {0, 0};
     SIZE m_sizeEditReferText = {0, 0};
     int m_btnWidth = 0;
