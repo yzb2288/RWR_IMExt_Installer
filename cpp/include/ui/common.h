@@ -15,9 +15,20 @@
 #define BTN_TEXT_VERTICAL_PADDING       5
 #define BTN_TEXT_HORIZONTAL_PADDING     10
 
+// 滑动条尺寸参数
+#define TRACKBAR_TICK_WIDTH    1
+#define TRACKBAR_TICK_HEIGHT   1
+#define TRACKBAR_TICK_SPACING  0
+#define TRACKBAR_LABEL_SPACING 0
+#define TRACKBAR_WND_MIN_WIDTH 150
+
 // 消息
 #define WM_USER_UPDATE_TREE_MAIN       (WM_USER + 100)
 #define WM_USER_UPDATE_TREE_DIALOG     (WM_USER + 200)
+#define WM_USER_HSCROLL                (WM_USER + 300)
+
+// 反射消息
+#define OCM_USER_HSCROLL         (OCM__BASE + WM_USER_HSCROLL)
 
 // 颜色
 #define MY_COLOR_DEFAULT RGB(0, 0, 0)
@@ -26,6 +37,8 @@
 #define MY_COLOR_WARNING RGB(218, 165, 32)
 #define MY_COLOR_SUCCESS RGB(0, 128, 0)
 #define MY_COLOR_SUCCESS_DARK RGB(0, 100, 0)
+#define MY_COLOR_TRACKBAR_TICK RGB(120,120,120)
+#define MY_COLOR_TRACKBAR_LABEL RGB(40,40,40)
 
 /*
 // 已经定义到resource.h, 数值量会自动保留
@@ -47,22 +60,31 @@
 // DPI 缩放像素间距
 inline int ScalePixelForWindow(HWND hWnd, int logicalPixels)
 {
+    typedef UINT(WINAPI* PFN_GetDpiForWindow)(HWND);
+    static PFN_GetDpiForWindow pGetDpiForWindow = nullptr;
+    static bool initFunc = false;
+
     UINT dpi = 96; // 默认标准 DPI
-    HMODULE hUser32 = GetModuleHandle(TEXT("user32.dll"));
-    if (hUser32) {
-        typedef UINT(WINAPI* PFN_GetDpiForWindow)(HWND);
-        PFN_GetDpiForWindow pGetDpiForWindow = (PFN_GetDpiForWindow)GetProcAddress(hUser32, "GetDpiForWindow");
-        if (pGetDpiForWindow) {
-            dpi = pGetDpiForWindow(hWnd);
-        } else {
-            // 兼容 Win7/Win8 系统的老旧方法
-            HDC hdc = ::GetDC(hWnd);
-            if (hdc) {
-                dpi = GetDeviceCaps(hdc, LOGPIXELSY);
-                ::ReleaseDC(hWnd, hdc);
-            }
+
+    if (!initFunc) {
+        HMODULE hUser32 = GetModuleHandle(TEXT("user32.dll"));
+        if (hUser32) {
+            pGetDpiForWindow = (PFN_GetDpiForWindow)GetProcAddress(hUser32, "GetDpiForWindow");
+        }
+        initFunc = true;
+    }
+
+    if (pGetDpiForWindow) {
+        dpi = pGetDpiForWindow(hWnd);
+    } else {
+        // 兼容 Win7/Win8 系统的老旧方法
+        HDC hdc = ::GetDC(hWnd);
+        if (hdc) {
+            dpi = GetDeviceCaps(hdc, LOGPIXELSY);
+            ::ReleaseDC(hWnd, hdc);
         }
     }
+    
     // 计算缩放后的像素（带四舍五入）
     return MulDiv(logicalPixels, dpi, 96);
 }

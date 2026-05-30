@@ -6,6 +6,9 @@
 #include <atlcoll.h>
 
 #include "utils/timestamp.h"
+extern "C" {
+    #include "utils/wildmatch.h"
+}
 
 #pragma comment(lib, "bcrypt.lib")
 #pragma comment(lib, "version.lib")
@@ -36,6 +39,7 @@ public:
     static CStringA NormalizePathUnix(LPCSTR filePath);
     static CString GetRealPath(const CString& filePath);
     static CString GetRoamingPath();
+    static bool GetRelativePath(const CString& filePath, bool isFileFolder, const CString& fromPath, bool isFromFolder, CString& relPath);
     static bool IsFile(const CString& filePath);
     static bool FileExists(const CString& filePath);
     static void OpenFile(const CString& filePath);
@@ -54,4 +58,6 @@ public:
         progressCallback pProgressCallback = nullptr, failureCallback pFailureCallback = nullptr, void* pCaller = nullptr,
         bool stopOnFailed = true
     );
+    static bool GetFileFullPathListByMask(LPCTSTR filePath, LPCTSTR relFileMask, CSimpleArray<CString>& outputFileFullPathList, bool recursive = true, bool findFolder = false);
+    static bool GetFileRelPathListByMask(LPCTSTR filePath, LPCTSTR relFileMask, CSimpleArray<CString>& outputFileRelPathList, bool recursive = true, bool findFolder = false);
 };

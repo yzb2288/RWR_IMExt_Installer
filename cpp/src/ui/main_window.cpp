@@ -97,6 +97,21 @@ LRESULT MainWindow::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
     m_btnInstallIMExt.SetColors(RGB(60, 179, 113), RGB(255, 255, 255));
     m_btnInstallIMExt.SetFont(m_font);
     m_btnInstallIMExt.EnableWindow(FALSE);
+    
+    // 增加安装按钮tooltip
+    m_toolTipOnBtnInstallIMExt.Create(m_hWnd, CToolTipCtrl::rcDefault, NULL, TTS_ALWAYSTIP);
+    TOOLINFO ti = {0};
+    ti.cbSize = sizeof(TOOLINFO);
+    ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS; 
+    ti.hwnd = m_hWnd;
+    ti.uId = (UINT_PTR)m_btnInstallIMExt.m_hWnd;
+    ti.lpszText = (LPTSTR)m_toolTipOnBtnInstallIMExtText.GetString();
+    m_toolTipOnBtnInstallIMExt.AddTool(&ti);
+    m_toolTipOnBtnInstallIMExt.SetDelayTime(TTDT_INITIAL, 0);
+    m_toolTipOnBtnInstallIMExt.SetDelayTime(TTDT_AUTOPOP, 10000);
+    m_toolTipOnBtnInstallIMExt.SetDelayTime(TTDT_RESHOW, 300);
+    m_toolTipOnBtnInstallIMExt.Activate(TRUE);
+
     m_labelIMExtInstallStatus.Create(m_hWnd, CStatic::rcDefault, m_labelIMExtInstallStatusText,
         WS_CHILD | WS_VISIBLE | SS_LEFT | SS_CENTERIMAGE, 0, IDC_LABEL_IMEXT_INSTALL_STATUS);
     m_labelIMExtInstallStatus.SetFont(m_font);
@@ -120,15 +135,10 @@ LRESULT MainWindow::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
     AdjustWndSize();
 
     SetTimer(IDT_UPDATE_STATIC_TIMER, 50);
-    if (IsWindows8OrGreater()) { // 当前系统需要大于win7
-        if (FileUtils::FileExists(m_rwrInstallPath + _T("\\") + ImextVerifier::strRwrGameExe)) {
-            StartCheckImextInstallStatus();
-        }
-    } else {
-        SetInstallStatusText(_TR(IDS_INCOMPATIBLE_WINDOWS), MY_COLOR_ERROR);
-        m_btnSelectRwrInstallPath.EnableWindow(FALSE);
-        m_btnSelectBackupPath.EnableWindow(FALSE);
-        m_btnInstallIMExt.EnableWindow(FALSE);
+    
+    // 不需要判断系统版本禁用
+    if (FileUtils::FileExists(m_rwrInstallPath + _T("\\") + ImextVerifier::strRwrGameExe)) {
+        StartCheckImextInstallStatus();
     }
 
     return 0;
@@ -354,6 +364,46 @@ void MainWindow::OnLButtonDown(UINT nFlags, CPoint point) {
     SetMsgHandled(FALSE); 
 }
 
+LRESULT MainWindow::OnContextMenu(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled) {
+    // wParam 是触发右键事件的窗口句柄
+    HWND hWndTarget = (HWND)wParam;
+    
+    // 判断属于安装IMEXT按钮
+    if (hWndTarget == GetDlgItem(IDC_BTN_INSTALL_IMEXT)) {
+        // 获取当前鼠标的屏幕坐标（lParam 包含了坐标，如果通过键盘触发则为 -1）
+        POINT pt;
+        pt.x = GET_X_LPARAM(lParam);
+        pt.y = GET_Y_LPARAM(lParam);
+
+        CreateToolBar(pt);
+        return 0;
+    }
+
+    bHandled = FALSE; // 不是目标按钮，交由系统默认处理
+    return 0;
+}
+
+void MainWindow::CreateToolBar(POINT pt) {
+    CMenu menu;
+    menu.CreatePopupMenu();
+
+    menu.AppendMenu(MF_STRING, IDM_RWR_FONT_RESIZE_TOOL, _TR(IDS_RWR_FONT_RESIZE_TOOL));
+
+    int cmd = menu.TrackPopupMenu(TPM_RETURNCMD, pt.x, pt.y, m_hWnd);
+    
+    switch (cmd)
+    {
+    case IDM_RWR_FONT_RESIZE_TOOL:
+    {
+        FontResizeToolDialog fdlg(m_rwrInstallPath);
+        fdlg.DoModal();
+        break;
+    }
+    default:
+        break;
+    }
+}
+
 void MainWindow::UpdateAllStaticControls() {
     LabelDrawInfo* pIMExtInstallStatusText = (LabelDrawInfo*)InterlockedExchangePointer((void **)&m_pPendingIMExtInstallStatusText, NULL);
     if (pIMExtInstallStatusText) {
@@ -559,25 +609,27 @@ void MainWindow::CheckImextInstallStatus()
     SetInstallStatusText(_TR(IDS_CHECK_INSTALLATION), MY_COLOR_DEFAULT);
 
     // 检查当前目录安装状态
-    CString installedVer;
     CString statusText;
-    bool installStatus = m_imextVerifier.CheckInstallVersion(m_rwrInstallPath, installedVer);
-    if (!installStatus) {
+    m_installStatus = m_imextVerifier.CheckInstallVersion(m_rwrInstallPath, m_installedVer);
+    if (!m_installStatus) {
         statusText = _TR(IDS_INSTALL_STATUS_NOT);
         SetInstallStatusText(statusText, MY_COLOR_ERROR);
     } else {
-        int compareRet = m_imextVerifier.VersionCompare(installedVer);
-        if (compareRet == 0) {
-            statusText.Format(L"%s %s", _TR(IDS_INSTALL_STATUS_LATEST), installedVer);
+        m_installedVerCompareRet = m_imextVerifier.VersionCompare(m_installedVer);
+        if (m_installedVerCompareRet == 0) {
+            statusText.Format(L"%s %s", _TR(IDS_INSTALL_STATUS_LATEST), m_installedVer);
             SetInstallStatusText(statusText, MY_COLOR_SUCCESS);
-        } else if (compareRet == -1) {
-            statusText.Format(L"%s %s", _TR(IDS_INSTALL_STATUS_OLD), installedVer);
+        } else if (m_installedVerCompareRet == -1) {
+            statusText.Format(L"%s %s", _TR(IDS_INSTALL_STATUS_OLD), m_installedVer);
             SetInstallStatusText(statusText, MY_COLOR_CRITICAL);
         } else {
-            statusText.Format(L"%s %s", _TR(IDS_INSTALL_STATUS_NEW), installedVer);
+            statusText.Format(L"%s %s", _TR(IDS_INSTALL_STATUS_NEW), m_installedVer);
             SetInstallStatusText(statusText, MY_COLOR_CRITICAL);
         }
     }
+
+    // 检查当前目录安装版本的编译时间, 没有时间戳Tag的版本统一当成第一次发布的时间
+    m_installTimestamp = m_imextVerifier.CheckInstallTimestamp(m_rwrInstallPath);
 
     // 检查文件MD5并展示文件树
     const cJSON* checkResult = m_imextVerifier.CheckFileMD5(m_rwrInstallPath);
@@ -612,17 +664,29 @@ void MainWindow::CheckImextInstallStatus()
     PostMessageW(WM_USER_UPDATE_TREE_MAIN); // 后面不能继续在子线程对节点进行任何操作
 
     // 检查游戏兼容性
-    bool gameCompatibility = m_imextVerifier.CheckGameCompatibility(m_rwrInstallPath);
-    if (gameCompatibility) {
-        m_btnSelectBackupPath.EnableWindow(TRUE);
-        m_btnInstallIMExt.EnableWindow(TRUE);
-    } else {
-        m_btnSelectBackupPath.EnableWindow(FALSE);
-        m_btnInstallIMExt.EnableWindow(FALSE);
-        // 需要改成更新按钮文字
-        statusText.Format(L"%s - %s", statusText, _TR(IDS_INCOMPATIBLE_GAME));
-        SetInstallStatusText(statusText, MY_COLOR_ERROR);
+    m_bGameCompatibility = m_imextVerifier.CheckGameCompatibility(m_rwrInstallPath);
+    // 不能单纯依靠exe md5来判断兼容性, 即使MD5和配置不一致只能说明游戏自己更新了EXE或者是插件自己更新了或者是被其他东西改了
+    switch (m_bGameCompatibility)
+    {
+    case ImextVerifier::GameCompatibility::IMExtTagExe:
+    {
+        // MD5不一致就是相当于版本不一致
+        statusText.Format(L"%s - %s", statusText, _TR(IDS_MISMATCHED_VERSION));
+        SetInstallStatusText(statusText, MY_COLOR_CRITICAL);
+        break;
     }
+    case ImextVerifier::GameCompatibility::UnknownExe:
+    {
+        statusText.Format(L"%s - %s", statusText, _TR(IDS_GAME_EXE_STATUS_ERROR));
+        SetInstallStatusText(statusText, MY_COLOR_CRITICAL);
+        break;
+    }
+    default:
+        break;
+    }
+
+    m_btnSelectBackupPath.EnableWindow(TRUE);
+    m_btnInstallIMExt.EnableWindow(TRUE);
 
     // 恢复更新游戏路径按钮状态
     SetProgressText(L"");
@@ -632,6 +696,95 @@ void MainWindow::CheckImextInstallStatus()
 void MainWindow::InstallImext()
 {
     SetInstallStatusText(_TR(IDS_INSTALLING), MY_COLOR_DEFAULT);
+
+    // 老系统提示
+    if (!IsWindows10OrGreater()) {
+        bool retOldWin = ShowModalAskDialog(
+            m_hWnd,
+            _TR(IDS_TITLE_NOTICE),
+            _TR(IDS_OLD_WIN_DESC)
+        );
+        if (!retOldWin) {
+            InitTreeNodeDataRoot();
+            CheckImextInstallStatus();
+            SetProgressText(_TR(IDS_CANCEL_INSTALL), MY_COLOR_ERROR);
+            return;
+        }
+    }
+
+    // 兼容异常提示
+    if (m_bGameCompatibility == ImextVerifier::GameCompatibility::UnknownExe) {
+        // 获取插件对应游戏EXE的更新日期
+        SYSTEMTIME stLocal;
+        CString updateTimeFormated = m_imextVerifier.m_lastGameUpdateTimestampStr;
+        if (UnixTimeToLocalSystemTime(m_imextVerifier.m_lastGameUpdateTimestamp, stLocal)) {
+            updateTimeFormated = GetFormattedTime(stLocal, L"%04d-%02d-%02d %02d:%02d:%02d");
+        }
+        CString unknownExeDescText;
+        unknownExeDescText.Format(L"%s\n%s: %s\n%s: %s", 
+            _TR(IDS_UNKNOWN_EXE_WARNING_DESC),
+            _TR(IDS_KEY_GAME_VERSION), m_imextVerifier.m_lastGameUpdateVersion,
+            _TR(IDS_KEY_LAST_GAME_UPDATE_TIMESTAMP), updateTimeFormated
+        ); // 不直接写是为了方便翻译
+        bool retUnknownExe = ShowModalAskDialog(
+            m_hWnd,
+            _TR(IDS_TITLE_WARNING),
+            unknownExeDescText,
+            (cJSON*)nullptr, nullptr, nullptr, IDI_WARNING
+        );
+        if (!retUnknownExe) {
+            InitTreeNodeDataRoot();
+            CheckImextInstallStatus();
+            SetProgressText(_TR(IDS_CANCEL_INSTALL), MY_COLOR_ERROR);
+            return;
+        }
+    }
+
+    // 版本号更高提示
+    if (!m_installedVer.IsEmpty() && m_installedVerCompareRet > 0) {
+        bool retOverwriteInstall = ShowModalAskDialog(
+            m_hWnd,
+            _TR(IDS_TITLE_NOTICE),
+            _TR(IDS_NEWER_VERSION_OVERWRITE_INSTALL_DESC)
+        );
+        if (!retOverwriteInstall) {
+            InitTreeNodeDataRoot();
+            CheckImextInstallStatus();
+            SetProgressText(_TR(IDS_CANCEL_INSTALL), MY_COLOR_ERROR);
+            return;
+        }
+    }
+
+    // 编译时间更晚提示
+    if (m_imextVerifier.m_timestamp < m_installTimestamp) {
+        SYSTEMTIME stLocalImext;
+        CString imextTimeFormated = m_imextVerifier.m_timestampStr;
+        if (UnixTimeToLocalSystemTime(m_imextVerifier.m_timestamp, stLocalImext)) {
+            imextTimeFormated = GetFormattedTime(stLocalImext, L"%04d-%02d-%02d %02d:%02d:%02d");
+        }
+        SYSTEMTIME stLocalInstall;
+        CString installTimeFormated;
+        if (UnixTimeToLocalSystemTime(m_installTimestamp, stLocalInstall)) {
+            installTimeFormated = GetFormattedTime(stLocalInstall, L"%04d-%02d-%02d %02d:%02d:%02d");
+        }
+        CString patchTimeDescText;
+        patchTimeDescText.Format(L"%s\n%s: %s\n%s: %s",
+            _TR(IDS_PATCH_TIME_NEWER_DESC),
+            _TR(IDS_IMEXT_PATCH_TIME), imextTimeFormated,
+            _TR(IDS_INSTALLED_PATCH_TIME), installTimeFormated
+        );
+        bool retPatchTime = ShowModalAskDialog(
+            m_hWnd,
+            _TR(IDS_TITLE_NOTICE),
+            patchTimeDescText
+        );
+        if (!retPatchTime) {
+            InitTreeNodeDataRoot();
+            CheckImextInstallStatus();
+            SetProgressText(_TR(IDS_CANCEL_INSTALL), MY_COLOR_ERROR);
+            return;
+        }
+    }
 
     // 准备数据
     SetProgressText(_TR(IDS_PREPARE_FILE_LIST));
@@ -799,6 +952,7 @@ void MainWindow::InstallImext()
         }
     }
 
+    /* // 不再需要进行DX9确认
     // 检查config
     if (m_rwrConfigManager.LoadConfig(m_rwrConfigPath)) {
         CString rendersystem = m_rwrConfigManager.GetValue(L"rendersystem");
@@ -809,6 +963,35 @@ void MainWindow::InstallImext()
                 _TR(IDS_DX9_NOTICE)
             );
         }
+    }
+    */
+
+    // 提供字体分辨率修改提示
+    CString fontResizeNoticeText;
+    fontResizeNoticeText.Format(L"%s\n%s\n \n%s",
+        _TR(IDS_RWR_FONT_PROBLEM_NOTICE_A),
+        _TR(IDS_RWR_FONT_PROBLEM_DESC),
+        _TR(IDS_RWR_FONT_PROBLEM_NOTICE_B)
+    );
+    ShowModalInfo(
+        m_hWnd,
+        _TR(IDS_TITLE_NOTICE),
+        fontResizeNoticeText
+    );
+
+    // 提示ini位置确定打开, 后续可以增加ini的字段校验和新增没有的字段的功能
+    CString iniNoticeText;
+    iniNoticeText.Format(L"%s\n%s",
+        _TR(IDS_IMEXT_INI_CONFIG_PATH_NOTICE),
+        FileUtils::NormalizePath(m_rwrInstallPath + L"\\" + ImextVerifier::strImextConfigIni)
+    );
+    bool retIniOpen = ShowModalAskDialog(
+        m_hWnd,
+        _TR(IDS_TITLE_NOTICE),
+        iniNoticeText
+    );
+    if (retIniOpen) {
+        FileUtils::OpenFile(m_rwrInstallPath + L"\\" + ImextVerifier::strImextConfigIni);
     }
 
     // 检查安装状态

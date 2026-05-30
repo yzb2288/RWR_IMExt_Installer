@@ -54,7 +54,7 @@ LRESULT AskDialog::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPara
     HICON hTitileIcon = (HICON)::LoadImage(ModuleHelper::GetResourceInstance(),
         MAKEINTRESOURCE(IDI_ICON_MAIN), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE);
 
-    SetIcon(hTitileIcon, TRUE);  // 设置大图标
+    //SetIcon(hTitileIcon, TRUE);  // 设置大图标
     SetIcon(hTitileIcon, FALSE); // 设置小图标（系统会自动将 hIcon 适配到小尺寸）
     // 设置描述文本
     SetDlgItemText(IDC_STATIC_TEXT_ASK_DIALOG, m_strText);
@@ -92,10 +92,6 @@ LRESULT AskDialog::OnSize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, BOOL&
     
     return 0;
 }
-
-/*void AskDialog::OnGetMinMaxInfo(LPMINMAXINFO lpMMI) {
-    GetMinWinSize(lpMMI->ptMinTrackSize.x, lpMMI->ptMinTrackSize.y);
-}*/
 
 LRESULT AskDialog::OnGetMinMaxInfo(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, BOOL& bHandled)
 {

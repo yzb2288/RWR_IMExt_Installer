@@ -19,6 +19,8 @@ typedef void (*ResetVerifyProgressCallback)(void* pCaller);
 
 class ImextVerifier {
 public:
+    enum GameCompatibility {TargetOriginalExe, IMExtCurrentExe, IMExtTagExe, UnknownExe};
+
     ImextVerifier();
     ~ImextVerifier();
     void Init(
@@ -29,7 +31,11 @@ public:
     );
 
     CString m_version;
+    CString m_timestampStr;
     LONGLONG m_timestamp;
+    CString m_lastGameUpdateVersion;
+    CString m_lastGameUpdateTimestampStr;
+    LONGLONG m_lastGameUpdateTimestamp;
     CString m_targetGameMD5;
 
     cJSON* m_imextFileRelPathMD5Info = nullptr;
@@ -37,14 +43,18 @@ public:
 
     inline static const CString strRwrGameExe = _T("rwr_game.exe");
     inline static const CString strImextDll = _T("IMExt.dll");
+    inline static const CString strImextConfigIni = _T("imext_config.ini");
     inline static const CString strImextDllVersionTag = _T("FileVersion");
     inline static const CString strImextDllCompatibleGameMD5Tag = _T("CompatibleGameMD5");
+    inline static const CString strGamePatchedTimestampTag = _T("PatchedTimestamp");
     inline static const CString strFirstVersion = _T("1.0.0");
     inline static const CString strFirstVersionImextDllMD5 = _T("b6214e3bb5af8e2979d97e7a31711268");
     inline static const CString strFirstVersionRwrGameExeMD5 = _T("7a0615b323f780a8a16bf34ea4c2e9ab");
+    inline static const LONGLONG llFirstVersionImextTimestamp = 1774530180LL;
 
-    bool CheckGameCompatibility(const CString& gameFolderPath);
+    int CheckGameCompatibility(const CString& gameFolderPath);
     bool CheckInstallVersion(const CString& gameFolderPath, CString& imextVer);
+    LONGLONG CheckInstallTimestamp(const CString& gameFolderPath);
     int VersionCompare(const CString& compareVersion);
     const cJSON* CheckFileMD5(const CString& gameFolderPath); // 返回合并的JSON节点
 

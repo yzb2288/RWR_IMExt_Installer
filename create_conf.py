@@ -12,5 +12,5 @@ if __name__ == "__main__":
         #target_game_md5="b3ca1876364f3ae66e0a8d833e7b7199", # rwr_game.exe 2026-03-12
         file_mask=FILE_MASK,
         imext_folder_path="./RunningWithRifles",
-        backup_folder_path="./backup/2026-03-13_14-11-12"
+        backup_folder_path="./backup/pre_build_game_update_backup"
     )

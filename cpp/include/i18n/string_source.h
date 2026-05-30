@@ -31,7 +31,7 @@ X(IDS_INSTALL_STATUS_NOT, "not_json_key_8", "NOT installed", "未安装") \
 X(IDS_INSTALL_STATUS_LATEST, "not_json_key_9", "Latest ver installed", "已安装最新版本") \
 X(IDS_INSTALL_STATUS_OLD, "not_json_key_10", "Older ver installed", "已安装旧版本") \
 X(IDS_NEWER_MODIFY_TIMESTAMP, "not_json_key_11", "Newer modify timestamp in game", "当前游戏文件新于IMExt插件文件") \
-X(IDS_INCOMPATIBLE_GAME, "not_json_key_12", "Incompatible", "不兼容") \
+X(IDS_MISMATCHED_VERSION, "not_json_key_12", "Version Mismatch", "版本不一致") \
 X(IDS_INSTALLING, "not_json_key_13", "Installing...", "正在安装...") \
 X(IDS_PREPARE_FILE_LIST, "not_json_key_14", "Prepare for file list data", "准备文件列表数据") \
 X(IDS_PREPARE_BACKUP, "not_json_key_15", "Prepare for backup", "准备备份文件") \
@@ -58,6 +58,28 @@ X(IDS_OPEN_IN_IMEXT, "not_json_key_35", "Open IMExt file", "打开插件目录�
 X(IDS_SHOW_IN_RWR, "not_json_key_36", "Show Game file in explorer", "在文件夹中显示游戏目录文件") \
 X(IDS_SHOW_IN_IMEXT, "not_json_key_37", "Show IMExt file in explorer", "在文件夹中显示插件目录文件") \
 X(IDS_INSTALL_STATUS_NEW, "not_json_key_38", "Newer ver installed", "已安装更新版本") \
+X(IDS_GAME_EXE_STATUS_ERROR, "not_json_key_39", "Game EXE status error", "游戏EXE状态异常") \
+X(IDS_OLD_WIN_DESC, "not_json_key_40", "Current system is below Windows 10. Some plugin modes may not work. See imext_config.ini after installation for details. Continue?", "当前系统版本低于Windows10, 插件部分模式可能无法生效, 具体说明请查看安装后的imext_config.ini文件, 是否继续?") \
+X(IDS_CANCEL_INSTALL, "not_json_key_41", "Cancel installation!", "取消安装!") \
+X(IDS_NEWER_VERSION_OVERWRITE_INSTALL_DESC, "not_json_key_42", "Installed version is newer than the installation version. Continue to OVERWRITE install?", "当前已安装版本的版本号高于待安装版本, 是否继续覆盖安装?") \
+X(IDS_TITLE_WARNING, "not_json_key_43", "Warning", "警告") \
+X(IDS_UNKNOWN_EXE_WARNING_DESC, "not_json_key_44", "Game EXE has been modified (by an official update or another program). Continuing may cause the game to crash or fail to start. Continue to OVERWRITE install?", "游戏EXE已被修改, 可能是游戏更新或者被其他程序修改, 继续安装可能导致游戏无法启动或崩溃, 是否继续覆盖安装?") \
+X(IDS_KEY_GAME_VERSION, "game_version", "Target game version for this installation", "本次安装对应的游戏版本") \
+X(IDS_KEY_LAST_GAME_UPDATE_TIMESTAMP, "last_game_update_timestamp", "Target game update date for this installation", "本次安装对应的游戏更新日期") \
+X(IDS_PATCH_TIME_NEWER_DESC, "not_json_key_45", "Installed version's build date is newer than the installation version. A newer version might already exist. Continue to OVERWRITE install?", "当前已安装版本的编译日期晚于待安装版本, 可能已经安装了新版本, 是否继续覆盖安装?") \
+X(IDS_IMEXT_PATCH_TIME, "not_json_key_46", "Buid date for this installation", "本次安装插件的编译日期") \
+X(IDS_INSTALLED_PATCH_TIME, "not_json_key_47", "Buid date for installed version", "已安装插件的编译日期") \
+X(IDS_IMEXT_INI_CONFIG_PATH_NOTICE, "not_json_key_48", "Plugin config path is shown below. Highly recommended to check before use. Open it now:", "插件配置文件路径如下, 强烈建议使用前查阅, 是否打开:") \
+X(IDS_TOOLTIP_ON_BTN_INSTALL_IMEXT, "not_json_key_49", "Right-click to open toolbar", "右键打开工具栏") \
+X(IDS_RWR_FONT_RESIZE_TOOL, "not_json_key_50", "RWR Font PNG resize tool", "RWR字体PNG尺寸调节工具") \
+X(IDS_SEARCH_PNG_FAILED, "not_json_key_51", "Font PNG files NOT found!", "当前目录无法找到字体PNG文件!") \
+X(IDS_RWR_FONT_RESIZE_TOOL_DESC, "not_json_key_52", "If you experience any of the following common issues in the game, please use the slider below to adjust the font size (Recommendation: Start at 6000x6000 and gradually decrease it). Please note that this action cannot be undone!", "当你在游戏中遇到如下典型问题时, 请进行通过下方滑条进行字体尺寸调整(建议先从6000x6000的分辨率开始逐步调小), 注意此操作不可逆!") \
+X(IDS_RESIZE_PNG_PROGRESS_STATUS_RESIZING, "not_json_key_53", "Resizing", "计算中") \
+X(IDS_RESIZE_PNG_PROGRESS_STATUS_SUCCEEDED, "not_json_key_54", "Succeeded", "成功") \
+X(IDS_RESIZE_PNG_PROGRESS_STATUS_FAILED, "not_json_key_55", "Failed", "失败") \
+X(IDS_RWR_FONT_PROBLEM_DESC, "not_json_key_56", "1. Game crashes occur when the loading screen reaches 80%–84%.\n2. Chatbubble or Chatlog text is invisible.\n3. Crashes or \"bad allocation\" pop-ups appear while starting switching maps.\n4. Long map loading times result in disconnections.", "1. 过图加载到80-84%阶段报错\n2. 对话框字体看不见\n3. 加载地图时报错或者弹出bad allocation弹窗\n4. 过图加载时间过长导致掉线") \
+X(IDS_RWR_FONT_PROBLEM_NOTICE_A, "not_json_key_57", "When using integrated graphics or a dual-GPU laptop (with or without direct GPU ouput), there is a certain probability of encountering the following issues:", "当你使用CPU核显、双显卡笔记本(无论是否独显直通)时, 会有一定概率遇到下面的问题:") \
+X(IDS_RWR_FONT_PROBLEM_NOTICE_B, "not_json_key_58", "These are usually because the current IMExt font size is too large, causing the font texture to fail to load. To fix this, right-click the \"Install IMExt\" button and open the \"RWR Font PNG resize tool\".", "这通常是由于当前IMExt的字体尺寸太大导致字体纹理加载失败导致的, 需要在\"安装IMExt\"按钮处右键打开\"RWR字体PNG尺寸调节工具\"进行解决") \
 
 // 不可直接换行, 必须用反斜杠\换行
 // 不可将EOF放到STRING_MACROS_TABLE末尾一行

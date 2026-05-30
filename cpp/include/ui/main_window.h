@@ -14,37 +14,21 @@
 #include "ui/common.h"
 #include "ui/file_tree_view.h"
 #include "ui/ask_dialog.h"
+#include "ui/my_edit.h"
 #include "ui/color_button.h"
+#include "ui/font_resize_tool_dialog.h"
 
 #include "i18n/i18n.h"
 #include "utils/file_utils.h"
 #include "core/imext_verifier.h"
 #include "core/rwr_config.h"
 
-class CMyEdit : public CWindowImpl<CMyEdit, CEdit> {
-public:
-    BEGIN_MSG_MAP(CMyEdit)
-        MSG_WM_KEYDOWN(OnKeyDown)
-    END_MSG_MAP()
-
-    void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {
-        if (nChar == VK_RETURN) {
-            // 1. 捕获回车并将焦点还给父窗口, 自动触发EN_KILLFOCUS
-            ::SetFocus(GetParent());
-            // 2. 拦截消息, 防止回车产生系统提示音或触发默认按钮
-            return; 
-        }
-        // 其他按钮交给原生 CEdit 处理
-        SetMsgHandled(FALSE);
-    }
-};
-
 struct LabelDrawInfo {
     CString text;
     COLORREF color;
 };
 
-typedef CWinTraits<WS_OVERLAPPEDWINDOW | WS_VISIBLE, WS_EX_APPWINDOW> CMainTraits;
+typedef CWinTraits<WS_OVERLAPPEDWINDOW | WS_VISIBLE, WS_EX_APPWINDOW | WS_EX_COMPOSITED> CMainTraits;
 
 class MainWindow : public CWindowImpl<MainWindow, CWindow, CMainTraits>, public FileTreeView<MainWindow>
 {
@@ -57,6 +41,7 @@ public:
         MESSAGE_HANDLER(WM_CREATE, OnCreate)
         MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
         MESSAGE_HANDLER(WM_SIZE, OnSize)
+        MESSAGE_HANDLER(WM_CONTEXTMENU, OnContextMenu)
         MSG_WM_GETMINMAXINFO(OnGetMinMaxInfo)
         MSG_WM_TIMER(OnTimer)
         MSG_WM_LBUTTONDOWN(OnLButtonDown)
@@ -77,6 +62,7 @@ private:
     LRESULT OnCreate(UINT, WPARAM, LPARAM, BOOL&);
     LRESULT OnDestroy(UINT, WPARAM, LPARAM, BOOL& bHandled);
     LRESULT OnSize(UINT, WPARAM, LPARAM lParam, BOOL&);
+    LRESULT OnContextMenu(UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
     void UpdateLayout(int clientWidth, int clientHeight);
     void OnGetMinMaxInfo(LPMINMAXINFO lpMMI);
     void OnTimer(UINT_PTR nIDEvent);
@@ -86,6 +72,7 @@ private:
     void AdjustWndSize(int expectWidth = 0, int expectHeight = 0);
     LRESULT OnCtlColorStatic(UINT, WPARAM wParam, LPARAM lParam, BOOL&);
     
+    void CreateToolBar(POINT pt);
     void SetInstallStatusText(const CString& text, COLORREF color = MY_COLOR_DEFAULT);
     void SetProgressText(const CString& text, COLORREF color = MY_COLOR_DEFAULT);
     void UpdateMD5CheckProgress(int progressNum, int totalNum);
@@ -103,6 +90,7 @@ private:
     CColorButton m_btnInstallIMExt;
     CStatic m_labelIMExtInstallStatus;
     CStatic m_labelProgress;
+    CToolTipCtrl m_toolTipOnBtnInstallIMExt;
 
     int m_fontSize = 9;
     CFont m_font;
@@ -111,6 +99,7 @@ private:
     CString m_labelIMExtInstallStatusText = _TR(IDS_NOT_RWR_PATH);
     COLORREF m_labelProgressColor = MY_COLOR_DEFAULT;
     CString m_labelProgressText = L"";
+    CString m_toolTipOnBtnInstallIMExtText = _TR(IDS_TOOLTIP_ON_BTN_INSTALL_IMEXT);
 
     CComAutoCriticalSection m_csMD5CheckProgress;
     volatile LONG m_nMaxMD5CheckProgress = -1;
@@ -136,8 +125,15 @@ private:
     CString m_backupPath = FileUtils::GetRealPath(L".\\backup"); // 是否应该使用exe路径
     CString m_rwrConfigPath = FileUtils::NormalizePath(FileUtils::GetRoamingPath() + L"\\Running with rifles\\config.xml"); // 不需要判断是否存在
 
+    bool m_installStatus = false;
+    CString m_installedVer = L"";
+    int m_installedVerCompareRet = 0;
+    LONGLONG m_installTimestamp = 0LL;
+
     ImextVerifier m_imextVerifier;
     RWRConfigManager m_rwrConfigManager;
+
+    int m_bGameCompatibility = ImextVerifier::GameCompatibility::UnknownExe;
 
     HANDLE m_hCheckInstallThread = NULL;
     void StartCheckImextInstallStatus();

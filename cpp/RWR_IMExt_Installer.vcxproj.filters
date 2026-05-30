@@ -22,6 +22,12 @@
     <ClCompile Include="src\utils\wildmatch.c">
       <Filter>src\utils</Filter>
     </ClCompile>
+    <ClCompile Include="src\ui\font_resize_tool_dialog.cpp">
+      <Filter>src\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\font_resize_tool.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ui\ask_dialog.h">
@@ -66,6 +72,30 @@
     <ClInclude Include="include\utils\wildmatch.h">
       <Filter>include\utils</Filter>
     </ClInclude>
+    <ClInclude Include="include\ui\font_resize_tool_dialog.h">
+      <Filter>include\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ui\my_edit.h">
+      <Filter>include\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ui\snap_track_bar.h">
+      <Filter>include\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ui\common.h">
+      <Filter>include\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\libs\stb\stb_image.h">
+      <Filter>include\libs\stb</Filter>
+    </ClInclude>
+    <ClInclude Include="include\libs\stb\stb_image_resize2.h">
+      <Filter>include\libs\stb</Filter>
+    </ClInclude>
+    <ClInclude Include="include\libs\stb\stb_image_write.h">
+      <Filter>include\libs\stb</Filter>
+    </ClInclude>
+    <ClInclude Include="include\core\font_resize_tool.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">
@@ -97,6 +127,12 @@
     </Filter>
     <Filter Include="src\utils">
       <UniqueIdentifier>{4eaf8a01-34b3-4405-bc71-70d1d5b09f33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\libs">
+      <UniqueIdentifier>{6296007c-13ff-423c-94aa-a1e88e4fb9c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\libs\stb">
+      <UniqueIdentifier>{98e1fa57-d0be-4626-941d-d8d401d105d8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

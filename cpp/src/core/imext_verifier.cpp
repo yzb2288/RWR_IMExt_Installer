@@ -80,7 +80,25 @@ void ImextVerifier::InitCheckFile() {
         errorMsg.Format(_T("Key \"%s\" not found!"), CA2T(_KU8(IDS_KEY_TIMESTAMP), CP_UTF8));
         FastFatalError(errorMsg);
     }
-    m_timestamp = ParseIsoToTimestamp(CA2T(timestamp->valuestring, CP_UTF8));
+    m_timestampStr = CA2T(timestamp->valuestring, CP_UTF8);
+    m_timestamp = ParseIsoToTimestamp(m_timestampStr);
+
+    cJSON* lastGameUpdateVersion = cJSON_GetObjectItemCaseSensitive(m_installConf, _KU8(IDS_KEY_GAME_VERSION));
+    if (!cJSON_IsString(lastGameUpdateVersion)) {
+        CString errorMsg;
+        errorMsg.Format(_T("Key \"%s\" not found!"), CA2T(_KU8(IDS_KEY_GAME_VERSION), CP_UTF8));
+        FastFatalError(errorMsg);
+    }
+    m_lastGameUpdateVersion = CA2T(lastGameUpdateVersion->valuestring, CP_UTF8);
+
+    cJSON* lastGameUpdateTimestamp = cJSON_GetObjectItemCaseSensitive(m_installConf, _KU8(IDS_KEY_LAST_GAME_UPDATE_TIMESTAMP));
+    if (!cJSON_IsString(lastGameUpdateTimestamp)) {
+        CString errorMsg;
+        errorMsg.Format(_T("Key \"%s\" not found!"), CA2T(_KU8(IDS_KEY_LAST_GAME_UPDATE_TIMESTAMP), CP_UTF8));
+        FastFatalError(errorMsg);
+    }
+    m_lastGameUpdateTimestampStr = CA2T(lastGameUpdateTimestamp->valuestring, CP_UTF8);
+    m_lastGameUpdateTimestamp = ParseIsoToTimestamp(m_lastGameUpdateTimestampStr);
 
     cJSON* targetGameMD5 = cJSON_GetObjectItemCaseSensitive(m_installConf, _KU8(IDS_KEY_TARGET_GAME_MD5));
     if (!cJSON_IsString(targetGameMD5)) {
@@ -387,10 +405,10 @@ void ImextVerifier::GetFileMD5List(const CSimpleArray<CString>& filePathList, CS
     }, this);
 }
 
-bool ImextVerifier::CheckGameCompatibility(const CString& gameFolderPath) {
+int ImextVerifier::CheckGameCompatibility(const CString& gameFolderPath) {
     CString gameExeMD5 = FileUtils::GetFileMD5(gameFolderPath + _T("\\") + strRwrGameExe);
     if (gameExeMD5.CompareNoCase(m_targetGameMD5) == 0) {
-        return true;
+        return GameCompatibility::TargetOriginalExe;
     } else {
         cJSON* imextGameExeMD5Info = cJSON_GetObjectItemCaseSensitive(m_imextFileRelPathMD5Info, CT2A(strRwrGameExe, CP_UTF8));
         if (!cJSON_IsString(imextGameExeMD5Info) || !imextGameExeMD5Info->valuestring || strlen(imextGameExeMD5Info->valuestring) != 32) {
@@ -400,9 +418,21 @@ bool ImextVerifier::CheckGameCompatibility(const CString& gameFolderPath) {
         }
         CString imextGameExeMD5(CA2T(imextGameExeMD5Info->valuestring, CP_UTF8));
         if (gameExeMD5.CompareNoCase(imextGameExeMD5) == 0) {
-            return true;
+            return GameCompatibility::IMExtCurrentExe;
         } else {
-            return false;
+            CString gameExePatchedTimestampString = FileUtils::GetVersionCustomTag(gameFolderPath + _T("\\") + strRwrGameExe, strGamePatchedTimestampTag);
+            if (gameExePatchedTimestampString.IsEmpty()) {
+                if (gameExeMD5.CompareNoCase(strFirstVersionRwrGameExeMD5) == 0) {
+                    // 当游戏EXE和第一版插件发布的游戏EXE相同时, 也认为是带Tag的
+                    return GameCompatibility::IMExtTagExe;
+                } else {
+                    // 可能是游戏更新、被其他软件修改、早期内测版本
+                    return GameCompatibility::UnknownExe;
+                }
+            } else {
+                // 通过检测gameExePatchedTimestampString判断是否是旧版本
+                return GameCompatibility::IMExtTagExe;
+            }
         }
     }
 }
@@ -454,6 +484,23 @@ bool ImextVerifier::CheckInstallVersion(const CString& gameFolderPath, CString& 
         } else {
             return false;
         }
+    }
+}
+
+LONGLONG ImextVerifier::CheckInstallTimestamp(const CString& gameFolderPath) {
+    // 只检查IMExt.dll的编译时间
+    CString imextPatchedTimestampString = FileUtils::GetVersionCustomTag(gameFolderPath + _T("\\") + strImextDll, strGamePatchedTimestampTag);
+    if (imextPatchedTimestampString.IsEmpty()) {
+        // 是第一次发布版或者是未发现时间戳Tag的版本统一当成第一次发布版的时间戳
+        return llFirstVersionImextTimestamp;
+    } else {
+        LONGLONG timestamp = ParseIsoToTimestamp(imextPatchedTimestampString);
+        if (timestamp == 0) {
+            CString errorMsg;
+            errorMsg.Format(_T("Invalid IMExt Timestamp Tag: %s"), imextPatchedTimestampString);
+            FastFatalError(errorMsg);
+        }
+        return timestamp;
     }
 }
 

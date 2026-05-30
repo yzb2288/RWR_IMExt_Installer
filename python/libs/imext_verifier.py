@@ -7,12 +7,11 @@ import hashlib
 import multiprocessing
 from pathlib import Path
 from copy import deepcopy
-from datetime import datetime, timezone, timedelta
-from packaging import version as ver
+from datetime import datetime
 from libs.dll_info import get_dll_custom_tag
 
 FILE_MASK = {
-    "IMExt Resources": ["*.dll", "*.cfg", "*.ttf", "*.otf"],
+    "IMExt Resources": ["*.dll", "*.ini", "*.cfg", "*.ttf", "*.otf"],
     "Game Exe": ["*.exe"],
     "Game Fonts": [
         "media/packages/vanilla/fonts/*.*",
@@ -159,12 +158,17 @@ class ImextVerifier:
     ):
         imext_dll_path = os.path.join(imext_folder_path, "IMExt.dll")
         imext_ver = get_dll_custom_tag(imext_dll_path, "FileVersion")
-        imext_compatible_game_md5 = get_dll_custom_tag(imext_dll_path, "CompatibleGameMD5").lower()
-        v = ver.parse(imext_ver)
+        # imext_compatible_game_md5 = get_dll_custom_tag(imext_dll_path, "CompatibleGameMD5").lower()
+        last_game_update_version = get_dll_custom_tag(imext_dll_path, "GameVersion")
+        last_game_update_timestamp = get_dll_custom_tag(imext_dll_path, "LastGameUpdateTimestamp")
+        imext_patch_timestamp_str = get_dll_custom_tag(imext_dll_path, "PatchedTimestamp")
         self.install_conf = {
-            "version": v.public,
-            "timestamp": datetime.now(timezone(timedelta(hours=8))).isoformat(),
-            "target_game_md5": imext_compatible_game_md5,
+            "version": imext_ver,
+            "timestamp": imext_patch_timestamp_str,
+            "game_version": last_game_update_version,
+            "last_game_update_timestamp": last_game_update_timestamp,
+            #"target_game_md5": imext_compatible_game_md5, # 此处应该改成游戏原版的exe md5
+            "target_game_md5": None,
             "file_mask": file_mask,
         }
         
@@ -187,6 +191,8 @@ class ImextVerifier:
         self.file_md5_list = [None] * self.total_file_num
         
         self.install_conf["game_file_md5"] = self.get_files_md5_dict(file_rel_path_list, backup_folder_path)
+        
+        self.install_conf["target_game_md5"] = self.install_conf["game_file_md5"]["rwr_game.exe"]
         
         #for backup_file_rel_path in list(self.install_conf["game_file_md5"].keys()):
         #    if backup_file_rel_path not in self.install_conf["imext_file_md5"].keys():

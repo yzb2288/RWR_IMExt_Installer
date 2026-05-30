@@ -13,13 +13,7 @@
 
 #include "i18n/i18n.h"
 #include "utils/file_utils.h"
-
-#define IDM_EXPAND_ALL    2001
-#define IDM_COLLAPSE_ALL  2002
-#define IDM_OPEN_IN_RWR   2003
-#define IDM_OPEN_IN_IMEXT 2004
-#define IDM_SHOW_IN_RWR   2005
-#define IDM_SHOW_IN_IMEXT 2006
+#include "ui/common.h"
 
 // 树节点数据类
 class FileTreeNodeData;

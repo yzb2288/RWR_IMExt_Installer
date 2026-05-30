@@ -11,14 +11,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\core\font_resize_tool.h" />
     <ClInclude Include="include\core\imext_verifier.h" />
     <ClInclude Include="include\core\rwr_config.h" />
     <ClInclude Include="include\i18n\i18n.h" />
     <ClInclude Include="include\i18n\string_source.h" />
+    <ClInclude Include="include\libs\stb\stb_image.h" />
+    <ClInclude Include="include\libs\stb\stb_image_resize2.h" />
+    <ClInclude Include="include\libs\stb\stb_image_write.h" />
     <ClInclude Include="include\ui\ask_dialog.h" />
     <ClInclude Include="include\ui\color_button.h" />
+    <ClInclude Include="include\ui\common.h" />
     <ClInclude Include="include\ui\file_tree_view.h" />
+    <ClInclude Include="include\ui\font_resize_tool_dialog.h" />
     <ClInclude Include="include\ui\main_window.h" />
+    <ClInclude Include="include\ui\my_edit.h" />
+    <ClInclude Include="include\ui\snap_track_bar.h" />
     <ClInclude Include="include\utils\errors.h" />
     <ClInclude Include="include\utils\file_utils.h" />
     <ClInclude Include="include\utils\semver.h" />
@@ -27,9 +35,11 @@
     <ClInclude Include="res\resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\font_resize_tool.cpp" />
     <ClCompile Include="src\core\imext_verifier.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ui\ask_dialog.cpp" />
+    <ClCompile Include="src\ui\font_resize_tool_dialog.cpp" />
     <ClCompile Include="src\ui\main_window.cpp" />
     <ClCompile Include="src\utils\file_utils.cpp" />
     <ClCompile Include="src\utils\semver.c" />
@@ -82,13 +92,13 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);./;./include/;./res</IncludePath>
     <SourcePath>$(VC_SourcePath);./src/</SourcePath>
     <IntDir>$(ProjectName)\$(Configuration)\</IntDir>
-    <EmbedManifest>false</EmbedManifest>
+    <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);./;./include/;./res</IncludePath>
     <SourcePath>$(VC_SourcePath);./src/</SourcePath>
     <IntDir>$(ProjectName)\$(Configuration)\</IntDir>
-    <EmbedManifest>false</EmbedManifest>
+    <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <VcpkgUseStatic>true</VcpkgUseStatic>

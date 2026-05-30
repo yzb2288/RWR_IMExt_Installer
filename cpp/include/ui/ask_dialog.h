@@ -74,9 +74,10 @@ inline bool ShowModalAskDialog(
     LPCTSTR text,
     const T* const fileRelPathInfo = nullptr,
     LPCTSTR rwrInstallPath = nullptr,
-    LPCTSTR imextPath = nullptr
+    LPCTSTR imextPath = nullptr,
+    LPCTSTR sysIcon = IDI_QUESTION
 ) {
-    AskDialog dlg(title, text, IDI_QUESTION, true, fileRelPathInfo, rwrInstallPath, imextPath);
+    AskDialog dlg(title, text, sysIcon, true, fileRelPathInfo, rwrInstallPath, imextPath);
     
     // DoModal 内部会调用 ::EnableWindow(hWndParent, FALSE)
     // 这会导致点击父窗口时产生 Windows 默认的闪烁和拦截音效

@@ -131,6 +131,35 @@ CString FileUtils::GetRealPath(const CString& filePath) {
     return realPath;
 }
 
+// 返回相对路径会带有./或者../的前缀
+bool FileUtils::GetRelativePath(const CString& filePath, bool isFileFolder, const CString& fromPath, bool isFromFolder, CString& relPath) {
+    // 基础防错检查
+    if (filePath.IsEmpty() || fromPath.IsEmpty())
+    {
+        relPath = filePath;
+        return false;
+    }
+
+    // 3. 调用 API 计算相对路径
+    TCHAR szRelative[MAX_PATH] = { 0 };
+    BOOL bRet = ::PathRelativePathTo(
+        szRelative, 
+        NormalizePath(fromPath), 
+        isFromFolder ? FILE_ATTRIBUTE_DIRECTORY : FILE_ATTRIBUTE_NORMAL, 
+        NormalizePath(filePath), 
+        isFileFolder ? FILE_ATTRIBUTE_DIRECTORY : FILE_ATTRIBUTE_NORMAL
+    );
+
+    if (bRet) {
+        relPath = szRelative;
+        return true;
+    } else {
+        // 计算失败（例如 C 盘到 D 盘），将原始路径赋给输出变量并返回 false
+        relPath = filePath;
+        return false;
+    }
+}
+
 bool FileUtils::IsFile(const CString& filePath) {
     DWORD dwAttrib = GetFileAttributes(filePath);
 
@@ -449,4 +478,92 @@ CString FileUtils::GetRoamingPath() {
         return CString(szPath);
     }
     return _T("");
+}
+
+bool FileUtils::GetFileFullPathListByMask(LPCTSTR filePath, LPCTSTR relFileMask, CSimpleArray<CString>& outputFileFullPathList, bool recursive, bool findFolder) {
+    bool ret = GetFileRelPathListByMask(filePath, relFileMask, outputFileFullPathList, recursive, findFolder);
+
+    int count = outputFileFullPathList.GetSize();
+    for (int i = 0; i < count; i++) {
+        outputFileFullPathList[i] = NormalizePath(CString(filePath) + _T("\\") + outputFileFullPathList[i]);
+    }
+
+    return ret;
+}
+
+bool FileUtils::GetFileRelPathListByMask(LPCTSTR filePath, LPCTSTR relFileMask, CSimpleArray<CString>& outputFileRelPathList, bool recursive, bool findFolder) {
+    outputFileRelPathList.RemoveAll();
+    CStringA pattern(CT2A(FileUtils::NormalizePathUnix(relFileMask), CP_UTF8));
+    CString nFilePath = NormalizePath(filePath);
+
+    // 检查输入路径是否有效
+    if (!FileExists(nFilePath)) {
+        return false;
+    }
+
+    // 如果是搜索路径是文件直接返回false
+    if (IsFile(nFilePath)) {
+        return false;
+    }
+
+    // 如果是文件夹则循环扫描
+    CAtlList<CString> searchRelFolderPathQueue;
+    searchRelFolderPathQueue.AddTail(_T(""));
+    // 由于采用了wildmatch, 这里直接写一个全部匹配的通配符
+    CString searchMask = _T("*");
+
+    bool bSuccess = true;
+    while (!searchRelFolderPathQueue.IsEmpty()) {
+        CString searchRelFolderPath = searchRelFolderPathQueue.RemoveHead();
+        CString searchFolderPath = NormalizePath(nFilePath + _T("\\") + searchRelFolderPath);
+        
+        WIN32_FIND_DATA findData;
+        HANDLE hFind = FindFirstFile(searchFolderPath + _T("\\") + searchMask, &findData);
+        if (hFind == INVALID_HANDLE_VALUE) {
+            bSuccess = false;
+            continue;
+        }
+
+        do {
+            // 跳过当前目录 "." 和上级目录 ".."
+            if (_tcscmp(findData.cFileName, _T(".")) == 0 || _tcscmp(findData.cFileName, _T("..")) == 0) {
+                continue;
+            }
+
+            // 构造当前相对路径
+            CString relPath;
+            if (searchRelFolderPath.IsEmpty()) {
+                relPath = findData.cFileName;
+            } else {
+                relPath = searchRelFolderPath + _T("\\") + findData.cFileName;
+            }
+
+            if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                // 如果是文件夹且开启了递归, 则添加子文件夹到搜索队列
+                if (recursive) {
+                    searchRelFolderPathQueue.AddTail(relPath);
+                }
+                // 输出文件夹路径模式
+                if (findFolder) {
+                    // 根据相对路径是否匹配加入结果列表
+                    CStringA text(CT2A(FileUtils::NormalizePathUnix(relPath), CP_UTF8));
+                    if (wildmatch(pattern, text, WILD_CASEFOLD | WILD_PATHNAME)) {
+                        outputFileRelPathList.Add(relPath);
+                    }
+                }
+            } else {
+                if (!findFolder) {
+                    // 根据相对路径是否匹配加入结果列表
+                    CStringA text(CT2A(FileUtils::NormalizePathUnix(relPath), CP_UTF8));
+                    if (wildmatch(pattern, text, WILD_CASEFOLD | WILD_PATHNAME)) {
+                        outputFileRelPathList.Add(relPath);
+                    }
+                }
+            }
+        } while (FindNextFile(hFind, &findData));
+
+        FindClose(hFind);
+    }
+
+    return bSuccess;
 }
