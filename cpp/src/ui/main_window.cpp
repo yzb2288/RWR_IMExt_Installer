@@ -652,7 +652,7 @@ void MainWindow::CheckImextInstallStatus()
             CString resultName(_K2TR(result->string));
             if (bAddTimestamp) {
                 SYSTEMTIME stLocal;
-                if (UnixTimeToLocalSystemTime(m_imextVerifier.m_timestamp, stLocal)) {
+                if (UnixTimeToLocalSystemTime(m_imextVerifier.m_lastGameUpdateTimestamp, stLocal)) {
                     resultName += GetFormattedTime(stLocal, L" (%04d-%02d-%02d %02d:%02d:%02d)");
                 }
             }
