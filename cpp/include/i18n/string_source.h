@@ -80,6 +80,11 @@ X(IDS_RESIZE_PNG_PROGRESS_STATUS_FAILED, "not_json_key_55", "Failed", "失败") 
 X(IDS_RWR_FONT_PROBLEM_DESC, "not_json_key_56", "1. Game crashes occur when the loading screen reaches 80%–84%.\n2. Chatbubble or Chatlog text is invisible.\n3. Crashes or \"bad allocation\" pop-ups appear while starting switching maps.\n4. Long map loading times result in disconnections.", "1. 过图加载到80-84%阶段报错\n2. 对话框字体看不见\n3. 加载地图时报错或者弹出bad allocation弹窗\n4. 过图加载时间过长导致掉线") \
 X(IDS_RWR_FONT_PROBLEM_NOTICE_A, "not_json_key_57", "When using integrated graphics or a dual-GPU laptop (with or without direct GPU ouput), there is a certain probability of encountering the following issues:", "当你使用CPU核显、双显卡笔记本(无论是否独显直通)时, 会有一定概率遇到下面的问题:") \
 X(IDS_RWR_FONT_PROBLEM_NOTICE_B, "not_json_key_58", "These are usually because the current IMExt font size is too large, causing the font texture to fail to load. To fix this, right-click the \"Install IMExt\" button and open the \"RWR Font PNG resize tool\".", "这通常是由于当前IMExt的字体尺寸太大导致字体纹理加载失败导致的, 需要在\"安装IMExt\"按钮处右键打开\"RWR字体PNG尺寸调节工具\"进行解决") \
+X(IDS_RESIZE_PNG_PROGRESS_SUCCEEDED_DIALOG_DESC, "not_json_key_59", "Fonts resize succeeded.", "字体尺寸调整已完成") \
+X(IDS_RESIZE_PNG_PROGRESS_FAILED_DIALOG_DESC, "not_json_key_60", "Failed to resize some fonts, please recheck.", "存在调整尺寸失败的字体, 请重新检查!") \
+X(IDS_SUBMIT_BTN, "not_json_key_61", "Submit", "提交") \
+X(IDS_QUIT_BTN, "not_json_key_62", "Quit", "退出") \
+X(IDS_RWR_FONT_PROBLEM_NOTICE_C, "not_json_key_63", "!!! The latest version of the plugin now persists in-game font resources, eliminating repeated reloading. As a result, the issues mentioned above are significantly less likely to occur -- unless you frequently switch between mods with different fonts, such as toggling back and forth between Vanilla and GFL_Castling. !!!", "!!! 当前最新版本插件已经针对游戏字体资源做了持久化处理, 不会反复重新载入字体资源, 上面这些问题遇到的概率理论上会大幅下降, 除非反复在使用不同字体的Mod之间切换, 比如反复在Vanilla和GFL_Castling这两个模式里面切换着玩 !!!") \
 
 // 不可直接换行, 必须用反斜杠\换行
 // 不可将EOF放到STRING_MACROS_TABLE末尾一行

@@ -11,6 +11,7 @@
 #include "ui/common.h"
 #include "ui/my_edit.h"
 #include "ui/snap_track_bar.h"
+#include "ui/ask_dialog.h"
 #include "i18n/i18n.h"
 #include "core/font_resize_tool.h"
 

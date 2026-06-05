@@ -34,8 +34,8 @@ LRESULT FontResizeToolDialog::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lPar
     m_editLabel.SetWindowText(m_unit);
     m_pngLabel.SetWindowText(m_pngLabelText);
     m_resizePngLabel.SetWindowText(m_resizePngLabelText);
-    m_btnOk.SetWindowText(_TR(IDS_OK_BTN));
-    m_btnCancel.SetWindowText(_TR(IDS_CANCEL_BTN));
+    m_btnOk.SetWindowText(_TR(IDS_SUBMIT_BTN));
+    m_btnCancel.SetWindowText(_TR(IDS_QUIT_BTN));
     SetWindowText(_TR(IDS_RWR_FONT_RESIZE_TOOL));
 
     HICON hTitileIcon = (HICON)::LoadImage(ModuleHelper::GetResourceInstance(),
@@ -474,11 +474,24 @@ unsigned __stdcall FontResizeToolDialog::ResizeFontsThreadEntry(void* pParam) {
     FontResizeToolDialog* pThis = static_cast<FontResizeToolDialog*>(pParam);
     
     // 执行实际的成员函数
-    pThis->m_fontResizeTool.ResizeFonts(ResizeFontsCallback, pThis);
+    bool ret = pThis->m_fontResizeTool.ResizeFonts(ResizeFontsCallback, pThis);
+
+    if (ret)
+        ShowModalInfo(
+            pThis->m_hWnd,
+            _TR(IDS_RESIZE_PNG_PROGRESS_STATUS_SUCCEEDED),
+            _TR(IDS_RESIZE_PNG_PROGRESS_SUCCEEDED_DIALOG_DESC)
+        );
+    else
+        ShowModalWarning(
+            pThis->m_hWnd,
+            _TR(IDS_TITLE_WARNING),
+            _TR(IDS_RESIZE_PNG_PROGRESS_FAILED_DIALOG_DESC)
+        );
 
     // 启用控件
     pThis->m_btnCancel.EnableWindow(TRUE);
-    pThis->m_btnOk.EnableWindow(TRUE);
+    //pThis->m_btnOk.EnableWindow(TRUE);
     pThis->m_slider.EnableWindow(TRUE);
     pThis->m_edit.EnableWindow(TRUE);
 

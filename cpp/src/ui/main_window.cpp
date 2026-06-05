@@ -968,10 +968,11 @@ void MainWindow::InstallImext()
 
     // 提供字体分辨率修改提示
     CString fontResizeNoticeText;
-    fontResizeNoticeText.Format(L"%s\n%s\n \n%s",
+    fontResizeNoticeText.Format(L"%s\n%s\n \n%s\n \n%s",
         _TR(IDS_RWR_FONT_PROBLEM_NOTICE_A),
         _TR(IDS_RWR_FONT_PROBLEM_DESC),
-        _TR(IDS_RWR_FONT_PROBLEM_NOTICE_B)
+        _TR(IDS_RWR_FONT_PROBLEM_NOTICE_B),
+        _TR(IDS_RWR_FONT_PROBLEM_NOTICE_C)
     );
     ShowModalInfo(
         m_hWnd,
