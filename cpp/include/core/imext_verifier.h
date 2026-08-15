@@ -43,7 +43,7 @@ public:
 
     inline static const CString strRwrGameExe = _T("rwr_game.exe");
     inline static const CString strImextDll = _T("IMExt.dll");
-    inline static const CString strImextConfigIni = _T("imext_config.ini");
+    inline static const CString strImextConfigYaml = _T("imext_config.yaml");
     inline static const CString strImextDllVersionTag = _T("FileVersion");
     inline static const CString strImextDllCompatibleGameMD5Tag = _T("CompatibleGameMD5");
     inline static const CString strGamePatchedTimestampTag = _T("PatchedTimestamp");
@@ -53,9 +53,13 @@ public:
     inline static const LONGLONG llFirstVersionImextTimestamp = 1774530180LL;
 
     int CheckGameCompatibility(const CString& gameFolderPath);
+    bool CheckInstallVersion110(const CString& gameFolderPath, CString& imextVer);
     bool CheckInstallVersion(const CString& gameFolderPath, CString& imextVer);
     LONGLONG CheckInstallTimestamp(const CString& gameFolderPath);
-    int VersionCompare(const CString& compareVersion);
+    int VersionCompareXYZ(const CString& compareVersionA, const CString& compareVersionB);
+    int VersionCompareXYZ(const CString& compareVersion);
+    int VersionCompareFull(const CString& compareVersionA, const CString& compareVersionB);
+    int VersionCompareFull(const CString& compareVersion);
     const cJSON* CheckFileMD5(const CString& gameFolderPath); // 返回合并的JSON节点
 
 private:

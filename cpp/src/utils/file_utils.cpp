@@ -471,6 +471,42 @@ bool FileUtils::CopyFilesByFileRelPathWithMakedirs(
     return finalRet;
 }
 
+bool FileUtils::RemoveFilesByFileRelPath(LPCTSTR dir, const CSimpleArray<CString>& fileRelPathList, bool stopOnFailed) {
+    CString nDirPath = NormalizePath(dir);
+    // 检查输入路径是否有效
+    if (!FileExists(nDirPath)) {
+        return false;
+    }
+    // 如果路径是文件直接返回false
+    if (IsFile(nDirPath)) {
+        return false;
+    }
+    // 如果文件相对路径计数是0返回false
+    int count = fileRelPathList.GetSize();
+    if (count == 0) return false;
+
+    bool finalRet = true;
+    for (int i = 0; i < count; i++) {
+        CString delFile = NormalizePath(nDirPath + _T("\\") + fileRelPathList[i]);
+        if (FileExists(delFile)) {
+            if (!DeleteFile(delFile)) {
+                if (stopOnFailed) {
+                    return false;
+                } else {
+                    finalRet = false;
+                }
+            }
+        } else {
+            if (stopOnFailed) {
+                return false;
+            } else {
+                finalRet = false;
+            }
+        }
+    }
+    return finalRet;
+}
+
 CString FileUtils::GetRoamingPath() {
     TCHAR szPath[MAX_PATH];
     // CSIDL_APPDATA 对应 Roaming 目录

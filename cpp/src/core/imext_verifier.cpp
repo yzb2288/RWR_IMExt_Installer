@@ -437,6 +437,51 @@ int ImextVerifier::CheckGameCompatibility(const CString& gameFolderPath) {
     }
 }
 
+bool ImextVerifier::CheckInstallVersion110(const CString& gameFolderPath, CString& imextVer) {
+    imextVer.SetString(_T(""));
+
+    CSimpleArray<CString> imextResourcesRelPathList;
+    imextResourcesRelPathList.Add(_T("imext_config.ini"));
+    imextResourcesRelPathList.Add(_T("IMEUiEmoji.ttf"));
+    imextResourcesRelPathList.Add(_T("IMEUiText.otf"));
+    imextResourcesRelPathList.Add(_T("IMExt.dll"));
+    imextResourcesRelPathList.Add(_T("UTF8Ext.dll"));
+    imextResourcesRelPathList.Add(_T("plugins_extra.cfg"));
+
+    // 检查IMExt Resources目录下的所有文件是否都存在（1.1.0及更早版本）
+    int count = imextResourcesRelPathList.GetSize();
+    bool finalRet = true;
+    for (int i = 0; i < count; i++) {
+        if (!FileUtils::IsFile(FileUtils::NormalizePath(gameFolderPath + _T("\\") + imextResourcesRelPathList[i]))) {
+            return false;
+        }
+    }
+
+    CString imextDllPath(gameFolderPath + _T("\\") + strImextDll);
+    imextVer = FileUtils::GetVersionCustomTag(imextDllPath, strImextDllVersionTag);
+    CString imextCompatibleGameMD5 = FileUtils::GetVersionCustomTag(imextDllPath, strImextDllCompatibleGameMD5Tag);
+    CString gameExeMD5 = FileUtils::GetFileMD5(gameFolderPath + _T("\\") + strRwrGameExe);
+
+    if (imextVer.IsEmpty()) {
+        if (FileUtils::GetFileMD5(imextDllPath).CompareNoCase(strFirstVersionImextDllMD5) == 0) {
+            imextVer.SetString(strFirstVersion);
+            if (gameExeMD5.CompareNoCase(strFirstVersionRwrGameExeMD5) == 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        if (gameExeMD5.CompareNoCase(imextCompatibleGameMD5) == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
 bool ImextVerifier::CheckInstallVersion(const CString& gameFolderPath, CString& imextVer) {
     imextVer.SetString(_T(""));
 
@@ -457,7 +502,8 @@ bool ImextVerifier::CheckInstallVersion(const CString& gameFolderPath, CString& 
             FastFatalError(errorMsg);
         }
         if (!FileUtils::IsFile(gameFolderPath + _T("\\") + fileRelPath)) {
-            return false;
+            // 当此版本有未安装文件时，回退1.1.0版本的检查逻辑
+            return CheckInstallVersion110(gameFolderPath, imextVer);
         }
         childfileRelPath = childfileRelPath->next;
     }
@@ -504,22 +550,50 @@ LONGLONG ImextVerifier::CheckInstallTimestamp(const CString& gameFolderPath) {
     }
 }
 
-int ImextVerifier::VersionCompare(const CString& compareVersion) {
-    semver_t current_version = {};
-    semver_t compare_version = {};
+int ImextVerifier::VersionCompareXYZ(const CString& compareVersionA, const CString& compareVersionB) {
+    semver_t a_version = {};
+    semver_t b_version = {};
 
-    if (semver_parse(CT2A(m_version, CP_UTF8), &current_version)
-    || semver_parse(CT2A(compareVersion, CP_UTF8), &compare_version)) {
+    if (semver_parse(CT2A(compareVersionA, CP_UTF8), &a_version)
+    || semver_parse(CT2A(compareVersionB, CP_UTF8), &b_version)) {
         CString errorMsg;
-        errorMsg.Format(_T("Invalid semver string!\ncompare: %s\ncurrent: %s"), compareVersion, m_version);
+        errorMsg.Format(_T("Invalid semver string!\na: %s\nb: %s"), compareVersionA, compareVersionB);
         FastFatalError(errorMsg);
     }
 
-    int resolution = semver_compare(compare_version, current_version);
+    int resolution = semver_compare_version(a_version, b_version);
 
     // Free allocated memory when we're done
-    semver_free(&current_version);
-    semver_free(&compare_version);
+    semver_free(&a_version);
+    semver_free(&b_version);
 
     return resolution;
+}
+
+int ImextVerifier::VersionCompareFull(const CString& compareVersionA, const CString& compareVersionB) {
+    semver_t a_version = {};
+    semver_t b_version = {};
+
+    if (semver_parse(CT2A(compareVersionA, CP_UTF8), &a_version)
+    || semver_parse(CT2A(compareVersionB, CP_UTF8), &b_version)) {
+        CString errorMsg;
+        errorMsg.Format(_T("Invalid semver string!\na: %s\nb: %s"), compareVersionA, compareVersionB);
+        FastFatalError(errorMsg);
+    }
+
+    int resolution = semver_compare(a_version, b_version);
+
+    // Free allocated memory when we're done
+    semver_free(&a_version);
+    semver_free(&b_version);
+
+    return resolution;
+}
+
+int ImextVerifier::VersionCompareXYZ(const CString& compareVersion) {
+    return VersionCompareXYZ(compareVersion, m_version);
+}
+
+int ImextVerifier::VersionCompareFull(const CString& compareVersion) {
+    return VersionCompareFull(compareVersion, m_version);
 }

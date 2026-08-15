@@ -59,7 +59,7 @@ X(IDS_SHOW_IN_RWR, "not_json_key_36", "Show Game file in explorer", "在文件�
 X(IDS_SHOW_IN_IMEXT, "not_json_key_37", "Show IMExt file in explorer", "在文件夹中显示插件目录文件") \
 X(IDS_INSTALL_STATUS_NEW, "not_json_key_38", "Newer ver installed", "已安装更新版本") \
 X(IDS_GAME_EXE_STATUS_ERROR, "not_json_key_39", "Game EXE status error", "游戏EXE状态异常") \
-X(IDS_OLD_WIN_DESC, "not_json_key_40", "Current system is below Windows 10. Some plugin modes may not work. See imext_config.ini after installation for details. Continue?", "当前系统版本低于Windows10, 插件部分模式可能无法生效, 具体说明请查看安装后的imext_config.ini文件, 是否继续?") \
+X(IDS_OLD_WIN_DESC, "not_json_key_40", "Current system is below Windows 10. Some plugin modes may not work. See imext_config.yaml after installation for details. Continue?", "当前系统版本低于Windows10, 插件部分模式可能无法生效, 具体说明请查看安装后的imext_config.yaml文件, 是否继续?") \
 X(IDS_CANCEL_INSTALL, "not_json_key_41", "Cancel installation!", "取消安装!") \
 X(IDS_NEWER_VERSION_OVERWRITE_INSTALL_DESC, "not_json_key_42", "Installed version is newer than the installation version. Continue to OVERWRITE install?", "当前已安装版本的版本号高于待安装版本, 是否继续覆盖安装?") \
 X(IDS_TITLE_WARNING, "not_json_key_43", "Warning", "警告") \
@@ -69,7 +69,7 @@ X(IDS_KEY_LAST_GAME_UPDATE_TIMESTAMP, "last_game_update_timestamp", "Target game
 X(IDS_PATCH_TIME_NEWER_DESC, "not_json_key_45", "Installed version's build date is newer than the installation version. A newer version might already exist. Continue to OVERWRITE install?", "当前已安装版本的编译日期晚于待安装版本, 可能已经安装了新版本, 是否继续覆盖安装?") \
 X(IDS_IMEXT_PATCH_TIME, "not_json_key_46", "Buid date for this installation", "本次安装插件的编译日期") \
 X(IDS_INSTALLED_PATCH_TIME, "not_json_key_47", "Buid date for installed version", "已安装插件的编译日期") \
-X(IDS_IMEXT_INI_CONFIG_PATH_NOTICE, "not_json_key_48", "Plugin config path is shown below. Highly recommended to check before use. Open it now:", "插件配置文件路径如下, 强烈建议使用前查阅, 是否打开:") \
+X(IDS_IMEXT_YAML_CONFIG_PATH_NOTICE, "not_json_key_48", "Plugin config path is shown below. Highly recommended to check before use. Open it now:", "插件配置文件路径如下, 强烈建议使用前查阅, 是否打开:") \
 X(IDS_TOOLTIP_ON_BTN_INSTALL_IMEXT, "not_json_key_49", "Right-click to open toolbar", "右键打开工具栏") \
 X(IDS_RWR_FONT_RESIZE_TOOL, "not_json_key_50", "RWR Font PNG resize tool", "RWR字体PNG尺寸调节工具") \
 X(IDS_SEARCH_PNG_FAILED, "not_json_key_51", "Font PNG files NOT found!", "当前目录无法找到字体PNG文件!") \
@@ -85,6 +85,13 @@ X(IDS_RESIZE_PNG_PROGRESS_FAILED_DIALOG_DESC, "not_json_key_60", "Failed to resi
 X(IDS_SUBMIT_BTN, "not_json_key_61", "Submit", "提交") \
 X(IDS_QUIT_BTN, "not_json_key_62", "Quit", "退出") \
 X(IDS_RWR_FONT_PROBLEM_NOTICE_C, "not_json_key_63", "!!! The latest version of the plugin now persists in-game font resources, eliminating repeated reloading. As a result, the issues mentioned above are significantly less likely to occur -- unless you frequently switch between mods with different fonts, such as toggling back and forth between Vanilla and GFL_Castling. !!!", "!!! 当前最新版本插件已经针对游戏字体资源做了持久化处理, 不会反复重新载入字体资源, 上面这些问题遇到的概率理论上会大幅下降, 除非反复在使用不同字体的Mod之间切换, 比如反复在Vanilla和GFL_Castling这两个模式里面切换着玩 !!!") \
+X(IDS_TITLE_UPGRADE_FROM_110_TO_120, "not_json_key_64", "Detected an upgrade from a lower version", "检测到从低版本升级") \
+X(IDS_DESC_UPGRADE_FROM_110_TO_120, "not_json_key_65", "The currently installed version is lower than 1.2.0. The plugin architecture in the latest version has changed and no longer requires replacing game fonts and translation files. Before upgrading, it is highly recommended to manually run a Steam integrity verification to restore the official files (after completion, you can click \"Cancel\" to proceed). You can also click the \"OK\" button to let the installer automatically restore the official original backup files and delete the redundant files from the old version plugin (but please note the update time of the current version plugin — the backup files here may not be synchronized with official updates).\n\nClick \"OK\" to restore from the installer's backup files, or click \"Cancel\" to skip this step.", "当前已安装版本低于1.2.0，最新版本的插件架构已经变更，不再需要替换游戏字体和翻译文件，升级前强烈建议手动执行一次Steam的完整性校验恢复官方文件（完成后你可以点击“取消”继续操作），你也可以点“确定”按钮让安装器自动恢复官方原版备份文件并删除旧版本插件的多余文件（但需要注意当前版本插件的更新时间，这里面的文件备份不一定跟官方更新同步）\n\n点击“确定”从安装器备份文件进行恢复，点击“取消”跳过此步骤") \
+X(IDS_ERROR_DESC_GET_OFFICIAL_BACKUP, "not_json_key_66", "The original file backup folder could not be found, or it is empty", "无法找到原版文件备份文件夹或者是空文件夹") \
+X(IDS_TITLE_CONFIRM, "not_json_key_67", "Please confirm", "请确认") \
+X(IDS_DESC_DELETE_OLD_FILE, "not_json_key_68", "Please confirm whether to delete the following old IMExt file(s)", "请确认是否删除如下旧的IMExt文件") \
+X(IDS_DESC_OFFICIAL_BACKUP_RECOVERY_SUCCEED, "not_json_key_69", "Official game file backup successfully restored.", "已成功恢复游戏官方原版文件备份") \
+X(IDS_DESC_DELETE_OLD_FILE_SUCCEED, "not_json_key_70", "Old IMExt file(s) successfully deleted.", "已成功删除旧文件") \
 
 // 不可直接换行, 必须用反斜杠\换行
 // 不可将EOF放到STRING_MACROS_TABLE末尾一行

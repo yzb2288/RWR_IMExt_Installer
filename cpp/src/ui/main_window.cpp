@@ -615,7 +615,7 @@ void MainWindow::CheckImextInstallStatus()
         statusText = _TR(IDS_INSTALL_STATUS_NOT);
         SetInstallStatusText(statusText, MY_COLOR_ERROR);
     } else {
-        m_installedVerCompareRet = m_imextVerifier.VersionCompare(m_installedVer);
+        m_installedVerCompareRet = m_imextVerifier.VersionCompareFull(m_installedVer);
         if (m_installedVerCompareRet == 0) {
             statusText.Format(L"%s %s", _TR(IDS_INSTALL_STATUS_LATEST), m_installedVer);
             SetInstallStatusText(statusText, MY_COLOR_SUCCESS);
@@ -697,6 +697,75 @@ void MainWindow::InstallImext()
 {
     SetInstallStatusText(_TR(IDS_INSTALLING), MY_COLOR_DEFAULT);
 
+    // 从低于1.2.0的旧版本升级，并且当前待安装版本大于等于1.2.0，需要提示恢复文件
+    // 仅在近期版本维护主动恢复文件策略，后续删除除了EXE以外的官方文件备份
+    if (!m_installedVer.IsEmpty() && m_imextVerifier.VersionCompareXYZ(m_imextVerifier.m_version, _T("1.2.0")) >= 0 && m_imextVerifier.VersionCompareXYZ(m_installedVer, _T("1.2.0")) == -1) {
+        bool retUpgradeFrom110To120 = ShowModalAskDialog(
+            m_hWnd,
+            _TR(IDS_TITLE_UPGRADE_FROM_110_TO_120),
+            _TR(IDS_DESC_UPGRADE_FROM_110_TO_120)
+        );
+        if (retUpgradeFrom110To120) {
+            // 获取原版文件备份文件夹下的所有文件
+            CSimpleArray<CString> officialBackupRelPathList;
+            if (!FileUtils::GetFileRelPathListByMask(m_officialBackupPath, _T("**"), officialBackupRelPathList) || officialBackupRelPathList.GetSize() == 0) {
+                CString errorText;
+                errorText.Format(L"%s: %s",
+                    _TR(IDS_ERROR_DESC_GET_OFFICIAL_BACKUP), m_officialBackupPath);
+                ShowModalError(
+                    m_hWnd,
+                    _TR(IDS_TITLE_ERROR),
+                    errorText
+                );
+                InitTreeNodeDataRoot();
+                CheckImextInstallStatus();
+                SetProgressText(_TR(IDS_CANCEL_INSTALL), MY_COLOR_ERROR);
+                return;
+            }
+
+            // 恢复文件
+            int ret = FileUtils::CopyFilesByFileRelPathWithMakedirs(
+                m_officialBackupPath, m_rwrInstallPath,
+                officialBackupRelPathList,
+                CopyFilesProgressCallback,
+                CopyFilesErrorCallback,
+                this,
+                true
+            );
+            if (!ret) {
+                // 检查安装状态并退出
+                InitTreeNodeDataRoot();
+                CheckImextInstallStatus();
+                SetProgressText(_TR(IDS_BACKUP_ERROR), MY_COLOR_ERROR);
+                return;
+            }
+
+            // 删除旧的插件文件
+            CSimpleArray<CString> deleteRelPathList;
+            deleteRelPathList.Add(L"imext_config.ini");
+            deleteRelPathList.Add(L"IMEUiEmoji.ttf");
+            deleteRelPathList.Add(L"IMEUiText.otf");
+            CString deleteDescText;
+            deleteDescText.Format(L"%s\n%s", _TR(IDS_DESC_OFFICIAL_BACKUP_RECOVERY_SUCCEED), _TR(IDS_DESC_DELETE_OLD_FILE));
+            bool retDeleteOldFile = ShowModalAskDialog(
+                m_hWnd,
+                _TR(IDS_TITLE_CONFIRM),
+                _TR(IDS_DESC_DELETE_OLD_FILE),
+                &deleteRelPathList,
+                m_rwrInstallPath,
+                m_imextPath
+            );
+            if (retDeleteOldFile) {
+                FileUtils::RemoveFilesByFileRelPath(m_rwrInstallPath, deleteRelPathList, false);
+                ShowModalInfo(
+                    m_hWnd,
+                    _TR(IDS_TITLE_CONFIRM),
+                    _TR(IDS_DESC_DELETE_OLD_FILE_SUCCEED)
+                );
+            }
+        }
+    }
+
     // 老系统提示
     if (!IsWindows10OrGreater()) {
         bool retOldWin = ShowModalAskDialog(
@@ -740,7 +809,7 @@ void MainWindow::InstallImext()
         }
     }
 
-    // 版本号更高提示
+    // 已安装版本号更高提示
     if (!m_installedVer.IsEmpty() && m_installedVerCompareRet > 0) {
         bool retOverwriteInstall = ShowModalAskDialog(
             m_hWnd,
@@ -755,7 +824,7 @@ void MainWindow::InstallImext()
         }
     }
 
-    // 编译时间更晚提示
+    // 已安装编译时间更晚提示
     if (m_imextVerifier.m_timestamp < m_installTimestamp) {
         SYSTEMTIME stLocalImext;
         CString imextTimeFormated = m_imextVerifier.m_timestampStr;
@@ -790,8 +859,6 @@ void MainWindow::InstallImext()
     SetProgressText(_TR(IDS_PREPARE_FILE_LIST));
     CSimpleArray<CString> backupFileRelPathList;
     CSimpleArray<CString> installImextFileList;
-    CSimpleArray<CString> installGameFontsFileList;
-    CSimpleArray<CString> installLocalizationFileList;
     cJSON* categoryFileRelPathInfo = m_imextVerifier.m_imextFileRelPathMD5InfoSorted->child;
     while (categoryFileRelPathInfo) {
         if (
@@ -800,6 +867,7 @@ void MainWindow::InstallImext()
             cJSON* childfileRelPath = categoryFileRelPathInfo->child;
             while (childfileRelPath) {
                 CString fileRelPath(CA2W(childfileRelPath->string, CP_UTF8));
+                backupFileRelPathList.Add(fileRelPath); // Imext Resources也要加入到里面防止用户需要整个恢复旧版本插件
                 installImextFileList.Add(fileRelPath);
                 childfileRelPath = childfileRelPath->next;
             }
@@ -807,24 +875,8 @@ void MainWindow::InstallImext()
             cJSON* childfileRelPath = categoryFileRelPathInfo->child;
             while (childfileRelPath) {
                 CString fileRelPath(CA2W(childfileRelPath->string, CP_UTF8));
-                backupFileRelPathList.Add(fileRelPath); // 除了Imext Resources都加到备份的文件列表
+                backupFileRelPathList.Add(fileRelPath);
                 installImextFileList.Add(fileRelPath);
-                childfileRelPath = childfileRelPath->next;
-            }
-        } else if (strcmp(categoryFileRelPathInfo->string, _KU8(IDS_KEY_CATEGORY_GAME_FONTS)) == 0) {
-            cJSON* childfileRelPath = categoryFileRelPathInfo->child;
-            while (childfileRelPath) {
-                CString fileRelPath(CA2W(childfileRelPath->string, CP_UTF8));
-                backupFileRelPathList.Add(fileRelPath);
-                installGameFontsFileList.Add(fileRelPath);
-                childfileRelPath = childfileRelPath->next;
-            }
-        } else if (strcmp(categoryFileRelPathInfo->string, _KU8(IDS_KEY_CATEGORY_LOCALIZATION_FILES)) == 0) {
-            cJSON* childfileRelPath = categoryFileRelPathInfo->child;
-            while (childfileRelPath) {
-                CString fileRelPath(CA2W(childfileRelPath->string, CP_UTF8));
-                backupFileRelPathList.Add(fileRelPath);
-                installLocalizationFileList.Add(fileRelPath);
                 childfileRelPath = childfileRelPath->next;
             }
         }
@@ -859,7 +911,7 @@ void MainWindow::InstallImext()
 
     CString installLabelProgressText;
     // 安装Imext Resources + Game Exe
-    installLabelProgressText.Format(L"%s 1/3", _TR(IDS_INSTALL_IMEXT)); // 不直接写是为了方便翻译
+    installLabelProgressText.Format(L"%s", _TR(IDS_INSTALL_IMEXT)); // 不直接写是为了方便翻译
     SetProgressText(installLabelProgressText, MY_COLOR_DEFAULT);
     bool retInstallImext = ShowModalAskDialog(
         m_hWnd,
@@ -873,71 +925,6 @@ void MainWindow::InstallImext()
         int ret = FileUtils::CopyFilesByFileRelPathWithMakedirs(
             m_imextPath, m_rwrInstallPath,
             installImextFileList,
-            CopyFilesProgressCallback,
-            CopyFilesErrorCallback,
-            this,
-            true
-        );
-        if (!ret) {
-            // 检查安装状态并退出
-            InitTreeNodeDataRoot();
-            CheckImextInstallStatus();
-            SetProgressText(_TR(IDS_INSTALL_IMEXT_ERROR), MY_COLOR_ERROR);
-            return;
-        }
-    }
-
-    // 安装Game Fonts
-    installLabelProgressText.Format(L"%s 2/3", _TR(IDS_INSTALL_IMEXT));
-    SetProgressText(installLabelProgressText, MY_COLOR_DEFAULT);
-    bool retInstallFonts = ShowModalAskDialog(
-        m_hWnd,
-        installLabelProgressText,
-        _TR(IDS_INSTALL_IMEXT_FONTS_DESC) + CString(L"\n") + m_rwrInstallPath,
-        &installGameFontsFileList,
-        m_rwrInstallPath,
-        m_imextPath
-    );
-    if (retInstallFonts) {
-        int ret = FileUtils::CopyFilesByFileRelPathWithMakedirs(
-            m_imextPath, m_rwrInstallPath,
-            installGameFontsFileList,
-            CopyFilesProgressCallback,
-            CopyFilesErrorCallback,
-            this,
-            true
-        );
-        if (!ret) {
-            // 检查安装状态并退出
-            InitTreeNodeDataRoot();
-            CheckImextInstallStatus();
-            SetProgressText(_TR(IDS_INSTALL_IMEXT_ERROR), MY_COLOR_ERROR);
-            return;
-        }
-    }
-
-    // 安装Localization files
-    installLabelProgressText.Format(L"%s 3/3", _TR(IDS_INSTALL_IMEXT));
-    SetProgressText(installLabelProgressText, MY_COLOR_DEFAULT);
-    CString dialogMsg;
-    dialogMsg.Format(
-        L"%s\n%s\n%s",
-        _TR(IDS_INSTALL_LOCALIZATION_FILES_DESC),
-        m_rwrInstallPath,
-        _TR(IDS_INSTALL_LOCALIZATION_FILES_DESC_NOTE)
-    );
-    bool retInstallLocalization = ShowModalAskDialog(
-        m_hWnd,
-        installLabelProgressText,
-        dialogMsg,
-        &installLocalizationFileList,
-        m_rwrInstallPath,
-        m_imextPath
-    );
-    if (retInstallLocalization) {
-        int ret = FileUtils::CopyFilesByFileRelPathWithMakedirs(
-            m_imextPath, m_rwrInstallPath,
-            installLocalizationFileList,
             CopyFilesProgressCallback,
             CopyFilesErrorCallback,
             this,
@@ -966,7 +953,7 @@ void MainWindow::InstallImext()
     }
     */
 
-    // 提供字体分辨率修改提示
+    /* // 不再提供字体分辨率修改提示
     CString fontResizeNoticeText;
     fontResizeNoticeText.Format(L"%s\n%s\n \n%s\n \n%s",
         _TR(IDS_RWR_FONT_PROBLEM_NOTICE_A),
@@ -978,13 +965,13 @@ void MainWindow::InstallImext()
         m_hWnd,
         _TR(IDS_TITLE_NOTICE),
         fontResizeNoticeText
-    );
+    ); */
 
     // 提示ini位置确定打开, 后续可以增加ini的字段校验和新增没有的字段的功能
     CString iniNoticeText;
     iniNoticeText.Format(L"%s\n%s",
-        _TR(IDS_IMEXT_INI_CONFIG_PATH_NOTICE),
-        FileUtils::NormalizePath(m_rwrInstallPath + L"\\" + ImextVerifier::strImextConfigIni)
+        _TR(IDS_IMEXT_YAML_CONFIG_PATH_NOTICE),
+        FileUtils::NormalizePath(m_rwrInstallPath + L"\\" + ImextVerifier::strImextConfigYaml)
     );
     bool retIniOpen = ShowModalAskDialog(
         m_hWnd,
@@ -992,7 +979,7 @@ void MainWindow::InstallImext()
         iniNoticeText
     );
     if (retIniOpen) {
-        FileUtils::OpenFile(m_rwrInstallPath + L"\\" + ImextVerifier::strImextConfigIni);
+        FileUtils::OpenFile(m_rwrInstallPath + L"\\" + ImextVerifier::strImextConfigYaml);
     }
 
     // 检查安装状态

@@ -123,6 +123,7 @@ private:
     CString m_rwrInstallPath = FileUtils::GetRealPath(FileUtils::GetExeDirectoryFile(L"..\\..\\..\\..\\common\\RunningWithRifles"));
     CString m_imextPath = FileUtils::GetExeDirectoryFile(L"RunningWithRifles");
     CString m_backupPath = FileUtils::GetRealPath(L".\\backup"); // 是否应该使用exe路径
+    CString m_officialBackupPath = FileUtils::GetExeDirectoryFile(L"backup\\pre_build_game_update_backup");
     CString m_rwrConfigPath = FileUtils::NormalizePath(FileUtils::GetRoamingPath() + L"\\Running with rifles\\config.xml"); // 不需要判断是否存在
 
     bool m_installStatus = false;

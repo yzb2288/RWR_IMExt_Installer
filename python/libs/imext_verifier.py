@@ -11,17 +11,14 @@ from datetime import datetime
 from libs.dll_info import get_dll_custom_tag
 
 FILE_MASK = {
-    "IMExt Resources": ["*.dll", "*.ini", "*.cfg", "*.ttf", "*.otf"],
-    "Game Exe": ["*.exe"],
-    "Game Fonts": [
-        "media/packages/vanilla/fonts/*.*",
-        "media/packages/vanilla/languages/font_config.xml",
-        "media/packages/vanilla/languages/**/font_config.xml"
+    "IMExt Resources": [
+        "*.dll", "*.yaml", "*.cfg",
+        "media/packages/vanilla/fonts/*.yaml",
+        "media/packages/vanilla/fonts/*.ttf",
+        "media/packages/vanilla/fonts/*.otf",
+        "media/packages/vanilla/fonts/*.ttc"
     ],
-    "Localization Files": [
-        "media/packages/*/languages/*.*",
-        "media/packages/*/languages/**/*.*"
-    ]
+    "Game Exe": ["*.exe"]
 }
 
 def calculate_md5(file_path):

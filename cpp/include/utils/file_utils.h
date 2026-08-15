@@ -58,6 +58,7 @@ public:
         progressCallback pProgressCallback = nullptr, failureCallback pFailureCallback = nullptr, void* pCaller = nullptr,
         bool stopOnFailed = true
     );
+    static bool RemoveFilesByFileRelPath(LPCTSTR dir, const CSimpleArray<CString>& fileRelPathList, bool stopOnFailed = true);
     static bool GetFileFullPathListByMask(LPCTSTR filePath, LPCTSTR relFileMask, CSimpleArray<CString>& outputFileFullPathList, bool recursive = true, bool findFolder = false);
     static bool GetFileRelPathListByMask(LPCTSTR filePath, LPCTSTR relFileMask, CSimpleArray<CString>& outputFileRelPathList, bool recursive = true, bool findFolder = false);
 };
