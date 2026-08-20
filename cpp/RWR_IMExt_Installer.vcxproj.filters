@@ -96,6 +96,18 @@
     <ClInclude Include="include\core\font_resize_tool.h">
       <Filter>include\core</Filter>
     </ClInclude>
+    <ClInclude Include="include\utils\monitor_utils.h">
+      <Filter>include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utils\regedit_utils.h">
+      <Filter>include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utils\string_utils.h">
+      <Filter>include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utils\xml_utils.h">
+      <Filter>include\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">

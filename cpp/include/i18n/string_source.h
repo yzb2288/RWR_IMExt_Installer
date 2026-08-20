@@ -92,6 +92,14 @@ X(IDS_TITLE_CONFIRM, "not_json_key_67", "Please confirm", "请确认") \
 X(IDS_DESC_DELETE_OLD_FILE, "not_json_key_68", "Please confirm whether to delete the following old IMExt file(s)", "请确认是否删除如下旧的IMExt文件") \
 X(IDS_DESC_OFFICIAL_BACKUP_RECOVERY_SUCCEED, "not_json_key_69", "Official game file backup successfully restored.", "已成功恢复游戏官方原版文件备份") \
 X(IDS_DESC_DELETE_OLD_FILE_SUCCEED, "not_json_key_70", "Old IMExt file(s) successfully deleted.", "已成功删除旧文件") \
+X(IDS_DELETE_DPI_FLAGS_ERROR, "not_json_key_71", "Cannot remove the high DPI settings for rwr_game.exe!", "无法移除rwr_game.exe的高DPI设置!") \
+X(IDS_DESC_DELETE_DPI_FLAGS, "not_json_key_72", "Detected that high DPI settings are enabled for rwr_game.exe. This may cause abnormal render resolution in the game. Do you want to automatically remove the existing high DPI settings?", "检测到rwr_game.exe勾选了高DPI设置，这可能导致游戏画面分辨率异常，是否自动移除已有的高DPI设置选项？") \
+X(IDS_DESC_CONFIG_RESOLUTION_MISMATCH, "not_json_key_73", "Detected that the current game resolution settings do not match the primary display.", "检测到当前游戏设置分辨率与主屏幕不一致") \
+X(IDS_DESC_CONFIG_RESOLUTION, "not_json_key_74", "Game Resolution", "游戏分辨率") \
+X(IDS_DESC_PRIMARY_RESOLUTION, "not_json_key_75", "Primary Display Resolution", "主屏幕分辨率") \
+X(IDS_DESC_ALL_RESOLUTION, "not_json_key_76", "All Display Resolution", "所有屏幕分辨率") \
+X(IDS_DESC_EDIT_CONFIG_RESOLUTION, "not_json_key_77", "Would you like to change the game resolution to match the primary display", "是否将游戏分辨率修改成主屏幕分辨率") \
+X(IDS_EDIT_CONFIG_RESOLUTION_ERROR, "not_json_key_78", "Change the game resolution failed!", "修改游戏分辨率失败!") \
 
 // 不可直接换行, 必须用反斜杠\换行
 // 不可将EOF放到STRING_MACROS_TABLE末尾一行

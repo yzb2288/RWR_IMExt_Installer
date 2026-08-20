@@ -20,6 +20,10 @@
 
 #include "i18n/i18n.h"
 #include "utils/file_utils.h"
+#include "utils/regedit_utils.h"
+#include "utils/string_utils.h"
+#include "utils/monitor_utils.h"
+#include "utils/xml_utils.h"
 #include "core/imext_verifier.h"
 #include "core/rwr_config.h"
 

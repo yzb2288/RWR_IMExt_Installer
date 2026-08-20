@@ -29,9 +29,13 @@
     <ClInclude Include="include\ui\snap_track_bar.h" />
     <ClInclude Include="include\utils\errors.h" />
     <ClInclude Include="include\utils\file_utils.h" />
+    <ClInclude Include="include\utils\monitor_utils.h" />
+    <ClInclude Include="include\utils\regedit_utils.h" />
     <ClInclude Include="include\utils\semver.h" />
+    <ClInclude Include="include\utils\string_utils.h" />
     <ClInclude Include="include\utils\timestamp.h" />
     <ClInclude Include="include\utils\wildmatch.h" />
+    <ClInclude Include="include\utils\xml_utils.h" />
     <ClInclude Include="res\resource.h" />
   </ItemGroup>
   <ItemGroup>

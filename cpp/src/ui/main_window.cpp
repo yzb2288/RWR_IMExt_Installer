@@ -939,6 +939,98 @@ void MainWindow::InstallImext()
         }
     }
 
+    // 检测当前游戏exe是否开启了高DPI设置
+    CString gameExePath = m_rwrInstallPath + _T("\\") + ImextVerifier::strRwrGameExe;
+    CString gameExeAppCompatFlags;
+    if (RegeditUtils::GetAppCompatFlags(gameExePath, gameExeAppCompatFlags)) {
+        gameExeAppCompatFlags.Trim();
+        CSimpleArray<CString> flagList = StringUtils::Split(gameExeAppCompatFlags);
+        CString pureFlags;
+        const int count = flagList.GetSize();
+        bool hasDpiFlags = false;
+        for (int i = 0; i < count; i++) {
+            if (flagList[i] == L"PERPROCESSSYSTEMDPIFORCEOFF") { hasDpiFlags = true; continue; }
+            if (flagList[i] == L"PERPROCESSSYSTEMDPIFORCEON") { hasDpiFlags = true; continue; }
+            if (flagList[i] == L"HIGHDPIAWARE") { hasDpiFlags = true; continue; }
+            if (flagList[i] == L"DPIUNAWARE") { hasDpiFlags = true; continue; }
+            if (flagList[i] == L"GDIDPISCALING") { hasDpiFlags = true; continue; }
+            pureFlags += flagList[i] + L" ";
+        }
+        pureFlags.Trim();
+
+        if (hasDpiFlags) {
+            bool retDelDpiFlags = ShowModalAskDialog(
+                m_hWnd,
+                _TR(IDS_TITLE_NOTICE),
+                _TR(IDS_DESC_DELETE_DPI_FLAGS)
+            );
+            if (retDelDpiFlags) {
+                if (!RegeditUtils::SetAppCompatFlags(gameExePath, pureFlags)) {
+                    InitTreeNodeDataRoot();
+                    CheckImextInstallStatus();
+                    SetProgressText(_TR(IDS_DELETE_DPI_FLAGS_ERROR), MY_COLOR_ERROR);
+                    return;
+                }
+            }
+        }
+    }
+
+    // 检测屏幕分辨率
+    MonitorUtils::ScreenResolution primaryScreenResolution;
+    CSimpleArray<MonitorUtils::ScreenResolution> allScreenResolutionList;
+    bool resolutionFetched = true;
+    do {
+        if (!MonitorUtils::GetPrimaryScreenResolution(primaryScreenResolution.nWidth, primaryScreenResolution.nHeight)) {
+            resolutionFetched = false;
+            break;
+        }
+        if (!MonitorUtils::GetAllScreenResolutionList(allScreenResolutionList)) {
+            resolutionFetched = false;
+            break;
+        }
+    } while (false);
+    
+    // 检测游戏配置文件分辨率
+    if (resolutionFetched) {
+        MonitorUtils::ScreenResolution configResolution;
+        if (XmlUtils::ReadConfigVideoModeResolution(m_rwrConfigPath, configResolution.nWidth, configResolution.nHeight)) {
+            if (configResolution != primaryScreenResolution) {
+                const int screenCount = allScreenResolutionList.GetSize();
+                CString allScreenResolutionStr;
+                for (int i = 0; i < screenCount; i++) {
+                    CString resFormatter;
+                    resFormatter.Format(L"%dx%d", allScreenResolutionList[i].nWidth, allScreenResolutionList[i].nHeight);
+                    if (i == (screenCount - 1))
+                        allScreenResolutionStr += resFormatter;
+                    else
+                        allScreenResolutionStr += resFormatter + L", ";
+                }
+                CString editConfigResolution;
+                editConfigResolution.Format(L"%s\n%s: %dx%d\n%s: %dx%d\n%s: %s\n\n%s (%dx%d)?",
+                    _TR(IDS_DESC_CONFIG_RESOLUTION_MISMATCH),
+                    _TR(IDS_DESC_CONFIG_RESOLUTION), configResolution.nWidth, configResolution.nHeight,
+                    _TR(IDS_DESC_PRIMARY_RESOLUTION), primaryScreenResolution.nWidth, primaryScreenResolution.nHeight,
+                    _TR(IDS_DESC_ALL_RESOLUTION), allScreenResolutionStr,
+                    _TR(IDS_DESC_EDIT_CONFIG_RESOLUTION), primaryScreenResolution.nWidth, primaryScreenResolution.nHeight
+                );
+                bool retChangeRes = ShowModalAskDialog(
+                    m_hWnd,
+                    _TR(IDS_TITLE_NOTICE),
+                    editConfigResolution
+                );
+                if (retChangeRes) {
+                    if (!XmlUtils::WriteConfigVideoModeResolution(m_rwrConfigPath, primaryScreenResolution.nWidth, primaryScreenResolution.nHeight)) {
+                        InitTreeNodeDataRoot();
+                        CheckImextInstallStatus();
+                        SetProgressText(_TR(IDS_EDIT_CONFIG_RESOLUTION_ERROR), MY_COLOR_ERROR);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+    
+
     /* // 不再需要进行DX9确认
     // 检查config
     if (m_rwrConfigManager.LoadConfig(m_rwrConfigPath)) {
